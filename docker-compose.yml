@@ -2,7 +2,7 @@ version: '3'
 
 services:
     node:
-        container_name: riott-api
+        container_name: riott
         build: .
         volumes:
             - .:/app
