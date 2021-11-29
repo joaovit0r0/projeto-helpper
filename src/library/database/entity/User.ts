@@ -6,7 +6,10 @@ export class User extends BaseEntity {
     public id: ObjectID;
 
     @Column({ unique: true })
-    public name: string;
+    public email: string;
+
+    @Column()
+    private password: string;
 
     @Column()
     public createdAt: Date;
