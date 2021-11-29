@@ -1,4 +1,5 @@
 import { Entity, ObjectID, ObjectIdColumn, Column, BeforeInsert, BeforeUpdate, BaseEntity } from 'typeorm';
+import bcryt from 'bcryptjs';
 
 @Entity()
 export class User extends BaseEntity {
@@ -9,7 +10,7 @@ export class User extends BaseEntity {
     public email: string;
 
     @Column()
-    private password: string;
+    public password: string;
 
     @Column()
     public createdAt: Date;
@@ -26,5 +27,11 @@ export class User extends BaseEntity {
     @BeforeUpdate()
     public setUpdateDate(): void {
         this.updatedAt = new Date();
+    }
+
+    @BeforeInsert()
+    @BeforeUpdate()
+    public hashPassword(): void {
+        this.password = bcryt.hashSync(this.password, 8);
     }
 }
