@@ -1,8 +1,9 @@
 // Modules
-import { DeepPartial } from 'typeorm';
 import { Request, Response } from 'express';
+import { DeepPartial } from 'typeorm/common/DeepPartial';
 
 // Library
+import jwt from 'jsonwebtoken';
 import { BaseController } from '../../../../library';
 
 // Decorators
@@ -79,35 +80,39 @@ export class UserController extends BaseController {
 
     /**
      * @swagger
-     * /v1/user:
-     *   post:
-     *     summary: Cadastra um usuário
+     * /v1/user/login:
+     *   get:
+     *     summary: Retorna informações de um usuário
      *     tags: [Users]
      *     consumes:
      *       - application/json
      *     produces:
      *       - application/json
-     *     requestBody:
-     *       content:
-     *         application/json:
-     *           schema:
-     *             type: object
-     *             example:
-     *               name: userName
-     *             required:
-     *               - name
-     *             properties:
-     *               name:
-     *                 type: string
+     *     parameters:
+     *       - in: path
+     *         name: userId
+     *         schema:
+     *           type: string
+     *         required: true
      *     responses:
-     *       $ref: '#/components/responses/baseCreate'
+     *       $ref: '#/components/responses/baseResponse'
      */
-    @Post()
+    @Post('/login')
     @PublicRoute()
     @Middlewares(UserValidator.post())
+    public async login(req: Request, res: Response): Promise<void> {
+        const token = jwt.sign({ id: req.body.userRef.id }, process.env.SECRET as string, { expiresIn: '1d' });
+
+        RouteResponse.success(token, res);
+    }
+
+    @Post('/cadastro') // rota para teste
+    @Middlewares(UserValidator.post())
+    @PublicRoute()
     public async add(req: Request, res: Response): Promise<void> {
         const newUser: DeepPartial<User> = {
-            name: req.body.name
+            email: req.body.email,
+            password: req.body.password
         };
 
         await new UserRepository().insert(newUser);
@@ -150,7 +155,7 @@ export class UserController extends BaseController {
     public async update(req: Request, res: Response): Promise<void> {
         const user: User = req.body.userRef;
 
-        user.name = req.body.name;
+        user.email = req.body.email;
 
         await new UserRepository().update(user);
 
