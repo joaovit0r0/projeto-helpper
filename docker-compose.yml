@@ -11,6 +11,7 @@ services:
             - NODE_ENV=development # Define o host, controla a exibição de logs e execução de migrations
             - PORT=8080
             - MONGO_CONNECTION_URL=mongodb://riott_root:55a716fe3d2053ed61b16948@riott-mongo:27017
+            - SECRET='1mGsJbb4h6Hw092BD8SbeF4OfWJR2TSt'
         networks:
             - riott-connect
         links:
