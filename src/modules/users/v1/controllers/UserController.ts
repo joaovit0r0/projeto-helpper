@@ -71,31 +71,41 @@ export class UserController extends BaseController {
      *     responses:
      *       $ref: '#/components/responses/baseResponse'
      */
-    @Get('/:id')
-    @PublicRoute()
-    @Middlewares(UserValidator.onlyId())
-    public async getOne(req: Request, res: Response): Promise<void> {
-        RouteResponse.success({ ...req.body.userRef }, res);
-    }
+    // @Get('/:id')
+    // @PublicRoute()
+    // @Middlewares(UserValidator.onlyId())
+    // public async getOne(req: Request, res: Response): Promise<void> {
+    //     RouteResponse.success({ ...req.body.userRef }, res);
+    // }
 
     /**
      * @swagger
-     * /v1/user/login:
-     *   get:
-     *     summary: Retorna informações de um usuário
-     *     tags: [Users]
+     * /v1/user:
+     *   post:
+     *     summary: Fazer login
+     *     tags: [Users, login]
      *     consumes:
      *       - application/json
      *     produces:
      *       - application/json
-     *     parameters:
-     *       - in: path
-     *         name: userId
-     *         schema:
-     *           type: string
-     *         required: true
+     *     requestBody:
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             example:
+     *               email: exemplo@email.com
+     *               password: senha123
+     *             required:
+     *               - email
+     *               - password
+     *             properties:
+     *               email:
+     *                 type: string
+     *               password:
+     *                  type: string
      *     responses:
-     *       $ref: '#/components/responses/baseResponse'
+     *       $ref: '#/components/responses/baseCreate'
      */
     @Post('/login')
     @PublicRoute()
@@ -106,8 +116,50 @@ export class UserController extends BaseController {
         RouteResponse.success(token, res);
     }
 
-    @Post('/cadastro') // rota para teste
-    @Middlewares(UserValidator.post())
+    @Get('/teste')
+    @PublicRoute()
+    @Middlewares(UserValidator.login())
+    public async teste(req: Request, res: Response): Promise<void> {
+        const userRepository: UserRepository = new UserRepository();
+        const user: User | undefined = await userRepository.findOne(req.body.userId.id);
+        if (user) {
+            RouteResponse.success('', res);
+        } else {
+            RouteResponse.unauthorizedError(res, '');
+        }
+    }
+
+    /**
+     * @swagger
+     * /v1/user:
+     *   post:
+     *     summary: Cadastrar um usuario
+     *     tags: [Users]
+     *     consumes:
+     *       - application/json
+     *     produces:
+     *       - application/json
+     *     requestBody:
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             example:
+     *               email: exemplo@email.com
+     *               password: senha123
+     *             required:
+     *               - email
+     *               - password
+     *             properties:
+     *               email:
+     *                 type: string
+     *               password:
+     *                  type: string
+     *     responses:
+     *       $ref: '#/components/responses/baseCreate'
+     */
+    @Post() // rota para teste
+    @Middlewares(UserValidator.signUp())
     @PublicRoute()
     public async add(req: Request, res: Response): Promise<void> {
         const newUser: DeepPartial<User> = {
