@@ -2,7 +2,8 @@
 import { RequestHandler } from 'express';
 import { Schema } from 'express-validator';
 import crypto from 'crypto';
-import { EnumCrypto } from '../../../../models/EnumCrypto';
+import jwt from 'jsonwebtoken';
+import { key } from '../../../../models/EnumCrypto';
 
 // Repositories
 import { UserRepository } from '../../../../library/database/repository/UserRepository';
@@ -72,16 +73,39 @@ export class UserValidator extends BaseValidator {
                     let check = false;
 
                     if (req.body.userRef) {
-                        const iv = req.body.userRef.initializationVector;
-                        const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(EnumCrypto.KEY), iv.b);
-                        let encrypted = cipher.update(req.body.password);
-                        encrypted = Buffer.concat([encrypted, cipher.final()]);
-                        req.body.password = encrypted;
+                        const [iv, encryptedData] = req.body.userRef.password.split(':');
+                        const cipher = crypto.createCipheriv('aes-256-cbc', key, Buffer.from(iv, 'hex'));
+                        const encrypted = Buffer.concat([cipher.update(Buffer.from(req.body.password)), cipher.final()]);
+                        req.body.password = encrypted.toString('hex');
 
-                        check = req.body.password === req.body.userRef.password;
+                        check = encryptedData === req.body.password;
                     }
 
                     return check ? Promise.resolve() : Promise.reject();
+                }
+            }
+        },
+        token: {
+            errorMessage: 'É necessário estar logado para executar está ação!',
+            custom: {
+                options: async (_: string, { req }) => {
+                    const authorization = req?.headers?.authorization;
+
+                    if (!authorization) {
+                        return Promise.reject();
+                    }
+
+                    const token = authorization.replace('Bearer', '').trim();
+
+                    try {
+                        const secret: string = process.env.SECRET || '';
+                        const data = jwt.verify(token, secret);
+                        req.body.userId = data;
+                    } catch {
+                        return Promise.reject();
+                    }
+
+                    return Promise.resolve();
                 }
             }
         }
@@ -94,8 +118,20 @@ export class UserValidator extends BaseValidator {
      */
     public static post(): RequestHandler[] {
         return UserValidator.validationList({
+            email: UserValidator.model.email,
+            password: UserValidator.model.password
+        });
+    }
+
+    public static signUp(): RequestHandler[] {
+        return UserValidator.validationList({
             email: UserValidator.validators.emailBase
-            // password: UserValidator.model.password
+        });
+    }
+
+    public static login(): RequestHandler[] {
+        return UserValidator.validationList({
+            token: UserValidator.model.token
         });
     }
 
