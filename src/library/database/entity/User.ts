@@ -2,7 +2,7 @@ import { Entity, ObjectID, ObjectIdColumn, Column, BeforeInsert, BeforeUpdate, B
 
 import crypto from 'crypto';
 
-import { key } from '../../../models/EnumCrypto';
+import { EncryptionUtils } from '../../../utils/EncryptionUtils';
 
 @Entity()
 export class User extends BaseEntity {
@@ -34,9 +34,8 @@ export class User extends BaseEntity {
 
     @BeforeInsert()
     public encrypt(): void {
-        const iv = Buffer.from(crypto.randomBytes(16));
-        const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
-        const encrypted = Buffer.concat([cipher.update(Buffer.from(this.password)), cipher.final()]);
-        this.password = `${iv.toString('hex')}:${encrypted.toString('hex')}`;
+        const iv: Buffer = Buffer.from(crypto.randomBytes(16));
+        const encryptedData: string = EncryptionUtils.encrypt(iv, Buffer.from(this.password));
+        this.password = `${iv.toString('hex')}:${encryptedData}`;
     }
 }
