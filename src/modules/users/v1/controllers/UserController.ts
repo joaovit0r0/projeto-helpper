@@ -3,7 +3,7 @@ import { DeepPartial } from 'typeorm';
 import { Request, Response } from 'express';
 
 // Library
-import { BaseController } from '../../../../library';
+import { BaseController, TaskRepository } from '../../../../library';
 
 // Decorators
 import { Controller, Delete, Get, Middlewares, Post, PublicRoute, Put } from '../../../../decorators';
@@ -15,10 +15,10 @@ import { EnumEndpoints } from '../../../../models';
 import { RouteResponse } from '../../../../routes';
 
 // Entities
-import { User } from '../../../../library/database/entity';
+import { Task } from '../../../../library/database/entity/Task';
 
 // Repositories
-import { UserRepository } from '../../../../library/database/repository';
+// import { UserRepository } from '../../../../library/database/repository';
 
 // Validators
 import { UserValidator } from '../middlewares/UserValidator';
@@ -27,54 +27,55 @@ import { UserValidator } from '../middlewares/UserValidator';
 export class UserController extends BaseController {
     /**
      * @swagger
-     * /v1/user:
+     * /v1/user/tasks:
      *   get:
      *     summary: Lista os usuários
-     *     tags: [Users]
+     *     tags: [Tasks]
      *     consumes:
      *       - application/json
      *     produces:
      *       - application/json
      *     parameters:
-     *       - $ref: '#/components/parameters/listPageRef'
-     *       - $ref: '#/components/parameters/listSizeRef'
-     *       - $ref: '#/components/parameters/listOrderRef'
-     *       - $ref: '#/components/parameters/listOrderByRef'
+     *       - parentId:
+     *           name: parentId
+     *           in: query
+     *           description: Id do parente que criou as tasks
+     *           schema:
+     *             type: string
      *     responses:
      *       $ref: '#/components/responses/baseResponse'
      */
-    @Get()
+    @Get('/tasks')
     @PublicRoute()
+    @Middlewares()
     public async get(req: Request, res: Response): Promise<void> {
-        const [rows, count] = await new UserRepository().list<User>(UserController.listParams(req));
-
-        RouteResponse.success({ rows, count }, res);
+        RouteResponse.successEmpty(res);
     }
 
     /**
      * @swagger
-     * /v1/user/{userId}:
+     * /v1/user/tasks/{taskId}:
      *   get:
-     *     summary: Retorna informações de um usuário
-     *     tags: [Users]
+     *     summary: Retorna informações de uma task
+     *     tags: [Tasks]
      *     consumes:
      *       - application/json
      *     produces:
      *       - application/json
      *     parameters:
      *       - in: path
-     *         name: userId
+     *         name: taskId
      *         schema:
      *           type: string
      *         required: true
      *     responses:
      *       $ref: '#/components/responses/baseResponse'
      */
-    @Get('/:id')
+    @Get('/tasks/:id')
     @PublicRoute()
     @Middlewares(UserValidator.onlyId())
     public async getOne(req: Request, res: Response): Promise<void> {
-        RouteResponse.success({ ...req.body.userRef }, res);
+        RouteResponse.success({ ...req.body.TaskRef }, res);
     }
 
     /**
@@ -82,7 +83,7 @@ export class UserController extends BaseController {
      * /v1/user:
      *   post:
      *     summary: Cadastra um usuário
-     *     tags: [Users]
+     *     tags: [Tasks]
      *     consumes:
      *       - application/json
      *     produces:
@@ -102,15 +103,16 @@ export class UserController extends BaseController {
      *     responses:
      *       $ref: '#/components/responses/baseCreate'
      */
-    @Post()
+    @Post('/tasks')
     @PublicRoute()
     @Middlewares(UserValidator.post())
     public async add(req: Request, res: Response): Promise<void> {
-        const newUser: DeepPartial<User> = {
-            name: req.body.name
+        const newTask: DeepPartial<Task> = {
+            description: req.body.description,
+            parentId: req.body.parentId
         };
 
-        await new UserRepository().insert(newUser);
+        await new TaskRepository().insert(newTask);
 
         RouteResponse.successCreate(res);
     }
@@ -120,7 +122,7 @@ export class UserController extends BaseController {
      * /v1/user:
      *   put:
      *     summary: Altera um usuário
-     *     tags: [Users]
+     *     tags: [Tasks]
      *     consumes:
      *       - application/json
      *     produces:
@@ -144,15 +146,15 @@ export class UserController extends BaseController {
      *     responses:
      *       $ref: '#/components/responses/baseEmpty'
      */
-    @Put()
+    @Put('/tasks')
     @PublicRoute()
     @Middlewares(UserValidator.put())
     public async update(req: Request, res: Response): Promise<void> {
-        const user: User = req.body.userRef;
+        const task: Task = req.body.taskRef;
 
-        user.name = req.body.name;
+        task.description = req.body.description;
 
-        await new UserRepository().update(user);
+        await new TaskRepository().update(task);
 
         RouteResponse.successEmpty(res);
     }
@@ -162,7 +164,7 @@ export class UserController extends BaseController {
      * /v1/user/{userId}:
      *   delete:
      *     summary: Apaga um usuário definitivamente
-     *     tags: [Users]
+     *     tags: [Tasks]
      *     consumes:
      *       - application/json
      *     produces:
@@ -176,13 +178,13 @@ export class UserController extends BaseController {
      *     responses:
      *       $ref: '#/components/responses/baseResponse'
      */
-    @Delete('/:id')
+    @Delete('/tasks/:id')
     @PublicRoute()
     @Middlewares(UserValidator.onlyId())
     public async remove(req: Request, res: Response): Promise<void> {
         const { id } = req.params;
 
-        await new UserRepository().delete(id);
+        await new TaskRepository().delete(id);
 
         RouteResponse.success({ id }, res);
     }
