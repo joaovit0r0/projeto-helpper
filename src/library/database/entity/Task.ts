@@ -9,6 +9,9 @@ export class Task extends BaseEntity {
     public description: string;
 
     @Column()
+    public parentId: string;
+
+    @Column()
     public createdAt: Date;
 
     @Column()
