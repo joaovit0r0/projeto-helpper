@@ -1,8 +1,6 @@
 import { Entity, ObjectID, ObjectIdColumn, Column, BeforeInsert, BeforeUpdate, BaseEntity } from 'typeorm';
 
-import crypto from 'crypto';
-
-import { EncryptionUtils } from '../../../utils/EncryptionUtils';
+import { StringUtils } from '../../../utils';
 
 @Entity()
 export class User extends BaseEntity {
@@ -33,9 +31,7 @@ export class User extends BaseEntity {
     }
 
     @BeforeInsert()
-    public encrypt(): void {
-        const iv: Buffer = Buffer.from(crypto.randomBytes(16));
-        const encryptedData: string = EncryptionUtils.encrypt(iv, Buffer.from(this.password));
-        this.password = `${iv.toString('hex')}:${encryptedData}`;
+    public async encrypt(): Promise<void> {
+        this.password = await StringUtils.hashString(this.password);
     }
 }
