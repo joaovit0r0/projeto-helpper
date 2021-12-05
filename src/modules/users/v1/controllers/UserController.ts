@@ -1,9 +1,10 @@
 // Modules
 import { Request, Response } from 'express';
+import { DeepPartial } from 'typeorm';
 
 // Library
 import jwt from 'jsonwebtoken';
-import { BaseController } from '../../../../library';
+import { BaseController, User, UserRepository } from '../../../../library';
 
 // Decorators
 import { Controller, Get, Middlewares, Post, PublicRoute } from '../../../../decorators';

@@ -7,7 +7,16 @@ export const swaggerConfig: swaggerJSDoc.OAS3Options = {
             title: 'Node API Boilerplate',
             version: '1.0.0'
         },
-        host: 'localhost:4444'
+        host: 'localhost:4444',
+        components: {
+            securitySchemes: {
+                BearerAuth: {
+                    type: 'http',
+                    scheme: 'bearer',
+                    bearerFormat: 'JWT'
+                }
+            }
+        }
     },
     apis: ['src/library/third-party/swagger/**/*.ts', 'src/modules/**/*.ts']
 };

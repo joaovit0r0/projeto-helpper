@@ -2,7 +2,7 @@
 import { RequestHandler } from 'express';
 import { Schema } from 'express-validator';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import { EncryptionUtils } from '../../../../utils/EncryptionUtils';
+import bcrypt from 'bcrypt';
 
 // Repositories
 import { UserRepository } from '../../../../library/database/repository/UserRepository';
@@ -55,10 +55,7 @@ export class UserValidator extends BaseValidator {
                     let check = false;
 
                     if (req.body.userRef) {
-                        const [iv, encryptedData] = req.body.userRef.password.split(':') as Array<string>;
-                        req.body.password = EncryptionUtils.encrypt(Buffer.from(iv, 'hex'), Buffer.from(req.body.password));
-
-                        check = encryptedData === req.body.password;
+                        check = await bcrypt.compare(req.body.password, req.body.userRef.password);
                     }
 
                     return check ? Promise.resolve() : Promise.reject();
@@ -67,9 +64,10 @@ export class UserValidator extends BaseValidator {
         },
         token: {
             errorMessage: 'É necessário estar logado para executar está ação!',
+            in: 'headers',
             custom: {
                 options: async (_: string, { req }) => {
-                    const authorization: string = req?.headers?.authorization;
+                    const authorization: string = req.headers?.authorization;
 
                     if (!authorization) {
                         return Promise.reject();
@@ -104,7 +102,7 @@ export class UserValidator extends BaseValidator {
     public static login(): RequestHandler[] {
         return UserValidator.validationList({
             email: UserValidator.model.email,
-            password: UserValidator.model.password
+            password: UserValidator.model.loginPassword
         });
     }
 
