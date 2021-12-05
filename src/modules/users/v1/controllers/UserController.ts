@@ -21,10 +21,10 @@ import { UserValidator } from '../middlewares/UserValidator';
 export class UserController extends BaseController {
     /**
      * @swagger
-     * /v1/user:
+     * /v1/user/login:
      *   post:
      *     summary: Fazer login
-     *     tags: [Users, login]
+     *     tags: [Users, Login]
      *     consumes:
      *       - application/json
      *     produces:
@@ -46,7 +46,7 @@ export class UserController extends BaseController {
      *               password:
      *                  type: string
      *     responses:
-     *       $ref: '#/components/responses/baseResponse'
+     *       $ref: '#/components/responses/baseLogin'
      */
     @Post('/login')
     @PublicRoute()
@@ -59,10 +59,32 @@ export class UserController extends BaseController {
 
     /**
      * @swagger
+     * /v1/user/login/validate:
+     *   get:
+     *     summary: Valida o token do usuário
+     *     tags: [Users, Protected routes]
+     *     consumes:
+     *       - application/json
+     *     produces:
+     *       - application/json
+     *     security:
+     *       - BearerAuth: []
+     *     responses:
+     *       $ref: '#/components/responses/baseResponse'
+     */
+    @Get('/login/validate')
+    @PublicRoute()
+    @Middlewares(UserValidator.validateToken())
+    public async teste(req: Request, res: Response): Promise<void> {
+        RouteResponse.success('', res);
+    }
+
+    /**
+     * @swagger
      * /v1/user:
      *   post:
-     *     summary: Fazer login
-     *     tags: [Users, login]
+     *     summary: Criar um usuário
+     *     tags: [Users,Test Routes]
      *     consumes:
      *       - application/json
      *     produces:
@@ -86,10 +108,17 @@ export class UserController extends BaseController {
      *     responses:
      *       $ref: '#/components/responses/baseResponse'
      */
-    @Get('/login/validate')
+    @Post()
     @PublicRoute()
-    @Middlewares(UserValidator.validateToken())
-    public async teste(req: Request, res: Response): Promise<void> {
-        RouteResponse.success('', res);
+    @Middlewares(UserValidator.signUp())
+    public async add(req: Request, res: Response): Promise<void> {
+        const newUser: DeepPartial<User> = {
+            email: req.body.email,
+            password: req.body.password
+        };
+
+        await new UserRepository().insert(newUser);
+
+        RouteResponse.successCreate(res);
     }
 }
