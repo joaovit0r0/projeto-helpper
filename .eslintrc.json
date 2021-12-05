@@ -24,7 +24,6 @@
     "rules": {
         "import/prefer-default-export": "off",
         "import/no-extraneous-dependencies": ["error", {"devDependencies": true}],
-        "prettier/prettier": "error",
         "class-methods-use-this": "off",
         "no-shadow": "off",
         "@typescript-eslint/no-shadow": ["error"],
@@ -45,6 +44,9 @@
                 "ts": "never"
             }
         ],
+        "prettier/prettier": ["error", {
+            "endOfLine": "auto"
+        }],
         "@typescript-eslint/explicit-function-return-type": [
             "error",
             {

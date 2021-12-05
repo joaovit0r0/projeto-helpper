@@ -49,6 +49,15 @@ export class UserValidator extends BaseValidator {
             }
         },
         password: {
+            errorMessage: 'Senha inválida',
+            in: 'body',
+            isStrongPassword: {
+                options: {
+                    minSymbols: 0
+                }
+            }
+        },
+        loginPassword: {
             errorMessage: 'Senha incorreta',
             custom: {
                 options: async (_: string, { req }) => {
@@ -95,7 +104,7 @@ export class UserValidator extends BaseValidator {
     };
 
     /**
-     * post
+     * login
      *
      * @returns Lista de validadores
      */
@@ -106,9 +115,26 @@ export class UserValidator extends BaseValidator {
         });
     }
 
+    /**
+     * validateToken
+     *
+     * @returns Lista de validadores
+     */
     public static validateToken(): RequestHandler[] {
         return UserValidator.validationList({
             token: UserValidator.model.token
+        });
+    }
+
+    /**
+     * signUp
+     *
+     * @returns Lista de validadores
+     */
+    public static signUp(): RequestHandler[] {
+        return UserValidator.validationList({
+            email: BaseValidator.validators.emailBase,
+            password: UserValidator.model.password
         });
     }
 }
