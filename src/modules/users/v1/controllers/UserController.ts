@@ -7,7 +7,7 @@ import jwt from 'jsonwebtoken';
 import { BaseController, User, UserRepository } from '../../../../library';
 
 // Decorators
-import { Controller, Get, Middlewares, Post, PublicRoute } from '../../../../decorators';
+import { Controller, Middlewares, Post, PublicRoute } from '../../../../decorators';
 
 // Models
 import { EnumEndpoints } from '../../../../models';
@@ -56,28 +56,6 @@ export class UserController extends BaseController {
         const token: string = jwt.sign({ id: req.body.userRef.id }, process.env.SECRET as string, { expiresIn: '1d' });
 
         RouteResponse.success(token, res);
-    }
-
-    /**
-     * @swagger
-     * /v1/user/login/validate:
-     *   get:
-     *     summary: Valida o token do usuário
-     *     tags: [Users, Protected routes]
-     *     consumes:
-     *       - application/json
-     *     produces:
-     *       - application/json
-     *     security:
-     *       - BearerAuth: []
-     *     responses:
-     *       $ref: '#/components/responses/baseResponse'
-     */
-    @Get('/login/validate')
-    @PublicRoute()
-    @Middlewares(UserValidator.validateToken())
-    public async teste(req: Request, res: Response): Promise<void> {
-        RouteResponse.success('', res);
     }
 
     /**
