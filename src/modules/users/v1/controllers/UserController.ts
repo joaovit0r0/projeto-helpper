@@ -4,7 +4,7 @@ import { DeepPartial } from 'typeorm';
 
 // Library
 import jwt from 'jsonwebtoken';
-import { BaseController, User, UserRepository } from '../../../../library';
+import { BaseController, User, UserRepository, TaskRepository } from '../../../../library';
 
 // Decorators
 import { Controller, Get, Middlewares, Post, PublicRoute } from '../../../../decorators';
@@ -14,6 +14,9 @@ import { EnumEndpoints } from '../../../../models';
 
 // Routes
 import { RouteResponse } from '../../../../routes';
+
+// Entities
+import { Task } from '../../../../library/database/entity/Task';
 
 // Validators
 import { UserValidator } from '../middlewares/UserValidator';
@@ -109,7 +112,7 @@ export class UserController extends BaseController {
      *     responses:
      *       $ref: '#/components/responses/baseResponse'
      */
-    @Post()
+    @Post('/tasks')
     @PublicRoute()
     @Middlewares(UserValidator.signUp())
     public async add(req: Request, res: Response): Promise<void> {
@@ -118,8 +121,80 @@ export class UserController extends BaseController {
             password: req.body.password
         };
 
-        await new UserRepository().insert(newUser);
+        await new TaskRepository().insert(newTask);
 
         RouteResponse.successCreate(res);
+    }
+  
+    /**
+     * @swagger
+     * /v1/user:
+     *   put:
+     *     summary: Altera um usuário
+     *     tags: [Tasks]
+     *     consumes:
+     *       - application/json
+     *     produces:
+     *       - application/json
+     *     requestBody:
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             example:
+     *               id: userId
+     *               name: userName
+     *             required:
+     *               - id
+     *               - name
+     *             properties:
+     *               id:
+     *                 type: string
+     *               name:
+     *                 type: string
+     *     responses:
+     *       $ref: '#/components/responses/baseEmpty'
+     */
+    @Put('/tasks')
+    @PublicRoute()
+    @Middlewares(UserValidator.put())
+    public async update(req: Request, res: Response): Promise<void> {
+        const task: Task = req.body.taskRef;
+
+        task.description = req.body.description;
+
+        await new TaskRepository().update(task);
+
+        RouteResponse.successEmpty(res);
+    }
+
+    /**
+     * @swagger
+     * /v1/user/{userId}:
+     *   delete:
+     *     summary: Apaga um usuário definitivamente
+     *     tags: [Tasks]
+     *     consumes:
+     *       - application/json
+     *     produces:
+     *       - application/json
+     *     parameters:
+     *       - in: path
+     *         name: userId
+     *         schema:
+     *           type: string
+     *         required: true
+     *     responses:
+     *       $ref: '#/components/responses/baseResponse'
+     */
+    @Delete('/tasks/:id')
+    @PublicRoute()
+    @Middlewares(UserValidator.onlyId())
+    public async remove(req: Request, res: Response): Promise<void> {
+        const { id } = req.params;
+
+        await new TaskRepository().delete(id);
+
+        RouteResponse.success({ id }, res);
     }
 }
