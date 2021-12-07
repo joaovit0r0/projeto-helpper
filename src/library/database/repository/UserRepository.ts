@@ -59,15 +59,15 @@ export class UserRepository extends BaseRepository {
     }
 
     /**
-     * findByName
+     * findByEmail
      *
-     * Busca um usuário pelo nome
+     * Busca um usuário pelo email
      *
-     * @param name - Nome do usuário
+     * @param email - Email do usuário
      *
      * @returns Usuário buscado
      */
-    public findByName(name: string): Promise<User | undefined> {
-        return this.getConnection().getRepository(User).findOne({ name });
+    public findByEmail(email: string | undefined): Promise<User | undefined> {
+        return this.getConnection().getRepository(User).findOne({ email });
     }
 }

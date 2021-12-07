@@ -1,12 +1,13 @@
 // Modules
-import { DeepPartial } from 'typeorm';
 import { Request, Response } from 'express';
+import { DeepPartial } from 'typeorm';
 
 // Library
-import { BaseController, TaskRepository } from '../../../../library';
+import jwt from 'jsonwebtoken';
+import { BaseController, User, UserRepository, TaskRepository } from '../../../../library';
 
 // Decorators
-import { Controller, Delete, Get, Middlewares, Post, PublicRoute, Put } from '../../../../decorators';
+import { Controller, Get, Middlewares, Post, PublicRoute } from '../../../../decorators';
 
 // Models
 import { EnumEndpoints } from '../../../../models';
@@ -17,9 +18,6 @@ import { RouteResponse } from '../../../../routes';
 // Entities
 import { Task } from '../../../../library/database/entity/Task';
 
-// Repositories
-// import { UserRepository } from '../../../../library/database/repository';
-
 // Validators
 import { UserValidator } from '../middlewares/UserValidator';
 
@@ -27,63 +25,10 @@ import { UserValidator } from '../middlewares/UserValidator';
 export class UserController extends BaseController {
     /**
      * @swagger
-     * /v1/user/tasks:
-     *   get:
-     *     summary: Lista os usuários
-     *     tags: [Tasks]
-     *     consumes:
-     *       - application/json
-     *     produces:
-     *       - application/json
-     *     parameters:
-     *       - parentId:
-     *           name: parentId
-     *           in: query
-     *           description: Id do parente que criou as tasks
-     *           schema:
-     *             type: string
-     *     responses:
-     *       $ref: '#/components/responses/baseResponse'
-     */
-    @Get('/tasks')
-    @PublicRoute()
-    @Middlewares()
-    public async get(req: Request, res: Response): Promise<void> {
-        RouteResponse.successEmpty(res);
-    }
-
-    /**
-     * @swagger
-     * /v1/user/tasks/{taskId}:
-     *   get:
-     *     summary: Retorna informações de uma task
-     *     tags: [Tasks]
-     *     consumes:
-     *       - application/json
-     *     produces:
-     *       - application/json
-     *     parameters:
-     *       - in: path
-     *         name: taskId
-     *         schema:
-     *           type: string
-     *         required: true
-     *     responses:
-     *       $ref: '#/components/responses/baseResponse'
-     */
-    @Get('/tasks/:id')
-    @PublicRoute()
-    @Middlewares(UserValidator.onlyId())
-    public async getOne(req: Request, res: Response): Promise<void> {
-        RouteResponse.success({ ...req.body.TaskRef }, res);
-    }
-
-    /**
-     * @swagger
-     * /v1/user:
+     * /v1/user/login:
      *   post:
-     *     summary: Cadastra um usuário
-     *     tags: [Tasks]
+     *     summary: Fazer login
+     *     tags: [Users, Login]
      *     consumes:
      *       - application/json
      *     produces:
@@ -94,29 +39,93 @@ export class UserController extends BaseController {
      *           schema:
      *             type: object
      *             example:
-     *               name: userName
+     *               email: exemplo@email.com
+     *               password: senha123
      *             required:
-     *               - name
+     *               - email
+     *               - password
      *             properties:
-     *               name:
+     *               email:
      *                 type: string
+     *               password:
+     *                  type: string
      *     responses:
-     *       $ref: '#/components/responses/baseCreate'
+     *       $ref: '#/components/responses/baseLogin'
+     */
+    @Post('/login')
+    @PublicRoute()
+    @Middlewares(UserValidator.login())
+    public async login(req: Request, res: Response): Promise<void> {
+        const token: string = jwt.sign({ id: req.body.userRef.id }, process.env.SECRET as string, { expiresIn: '1d' });
+
+        RouteResponse.success(token, res);
+    }
+
+    /**
+     * @swagger
+     * /v1/user/login/validate:
+     *   get:
+     *     summary: Valida o token do usuário
+     *     tags: [Users, Protected routes]
+     *     consumes:
+     *       - application/json
+     *     produces:
+     *       - application/json
+     *     security:
+     *       - BearerAuth: []
+     *     responses:
+     *       $ref: '#/components/responses/baseResponse'
+     */
+    @Get('/login/validate')
+    @PublicRoute()
+    @Middlewares(UserValidator.validateToken())
+    public async teste(req: Request, res: Response): Promise<void> {
+        RouteResponse.success('', res);
+    }
+
+    /**
+     * @swagger
+     * /v1/user:
+     *   post:
+     *     summary: Criar um usuário
+     *     tags: [Users,Test Routes]
+     *     consumes:
+     *       - application/json
+     *     produces:
+     *       - application/json
+     *     requestBody:
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             example:
+     *               email: exemplo@email.com
+     *               password: senha123
+     *             required:
+     *               - email
+     *               - password
+     *             properties:
+     *               email:
+     *                 type: string
+     *               password:
+     *                  type: string
+     *     responses:
+     *       $ref: '#/components/responses/baseResponse'
      */
     @Post('/tasks')
     @PublicRoute()
-    @Middlewares(UserValidator.post())
+    @Middlewares(UserValidator.signUp())
     public async add(req: Request, res: Response): Promise<void> {
-        const newTask: DeepPartial<Task> = {
-            description: req.body.description,
-            parentId: req.body.parentId
+        const newUser: DeepPartial<User> = {
+            email: req.body.email,
+            password: req.body.password
         };
 
         await new TaskRepository().insert(newTask);
 
         RouteResponse.successCreate(res);
     }
-
+  
     /**
      * @swagger
      * /v1/user:

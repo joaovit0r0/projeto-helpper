@@ -112,4 +112,31 @@
  *         $ref: '#/components/responses/401'
  *       '500':
  *         $ref: '#/components/responses/500'
+ *     baseLogin:
+ *       '200':
+ *         description: 'Requisição executada com sucesso'
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: boolean
+ *                 date:
+ *                   type: string
+ *                   format: date-time
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     token:
+ *                       type: string
+ *                   example:
+ *                     token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+ *                   description: 'Objeto json de retorno contendo um token JWT'
+ *       '400':
+ *         $ref: '#/components/responses/400'
+ *       '401':
+ *         $ref: '#/components/responses/401'
+ *       '500':
+ *         $ref: '#/components/responses/500'
  */
