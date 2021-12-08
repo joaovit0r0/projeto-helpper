@@ -11,15 +11,6 @@
  *         description:
  *           type: string
  *           example: some description
- *         parentId:
- *           type: string
- *           example: 61b016a680817a00379f1e4c
- *         createdAt:
- *           type: string
- *           format: date-time
- *         updatedAt:
- *           type: string
- *           format: date-time
  *   responses:
  *     '200':
  *       description: 'Requisição executada com sucesso'
