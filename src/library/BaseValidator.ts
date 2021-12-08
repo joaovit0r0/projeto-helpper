@@ -3,13 +3,15 @@ import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { checkSchema, Result, Schema, ParamSchema, ValidationError, validationResult, Meta } from 'express-validator';
 
 // Utils
+import jwt, { JwtPayload } from 'jsonwebtoken';
+import { User } from 'library';
 import { StringUtils } from '../utils';
 
 // Routes
 import { RouteResponse } from '../routes';
 
 // Repositories
-import { BaseRepository } from './database/repository';
+import { BaseRepository, UserRepository } from './database/repository';
 
 /**
  * BaseValidator
@@ -65,6 +67,38 @@ export class BaseValidator {
             in: 'body',
             isEmail: true,
             errorMessage: 'Email inválido'
+        },
+        token: {
+            errorMessage: 'É necessário estar logado para executar está ação!',
+            in: 'headers',
+            custom: {
+                options: async (_: string, { req }: Meta) => {
+                    const authorization: string = req.headers?.authorization;
+
+                    if (!authorization) {
+                        return Promise.reject();
+                    }
+
+                    const token: string = authorization.replace('Bearer', '').trim();
+
+                    try {
+                        const secret: string = process.env.SECRET || '';
+                        const data: string | JwtPayload = jwt.verify(token, secret);
+                        req.body.userData = data;
+                    } catch {
+                        return Promise.reject();
+                    }
+
+                    const userRepository: UserRepository = new UserRepository();
+                    const user: User | undefined = await userRepository.findOne(req.body.userData.id);
+
+                    if (user) {
+                        req.body.userRef = user;
+                        return Promise.resolve();
+                    }
+                    return Promise.reject();
+                }
+            }
         }
     };
 
