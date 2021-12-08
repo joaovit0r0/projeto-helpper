@@ -1,6 +1,6 @@
 // Libraries
 import { RequestHandler } from 'express';
-import { Schema } from 'express-validator';
+import { Meta, Schema } from 'express-validator';
 
 // Repositories
 import { TaskRepository } from '../../../../library/database/repository/TaskRepository';
@@ -19,7 +19,16 @@ export class TaskValidator extends BaseValidator {
             isString: true,
             isLength: {
                 options: {
-                    min: 1
+                    min: 4
+                }
+            }
+        },
+        parentId: {
+            errorMessage: 'Tarefa não pertence ao usuário',
+            custom: {
+                options: (_: string, { req }: Meta) => {
+                    const { taskRef, userRef } = req.body;
+                    return taskRef.parentId.toString() === userRef.id.toString() ? Promise.resolve() : Promise.reject();
                 }
             }
         }
@@ -27,20 +36,31 @@ export class TaskValidator extends BaseValidator {
 
     public static put(): RequestHandler[] {
         return TaskValidator.validationList({
+            token: BaseValidator.validators.token,
             id: TaskValidator.model.id,
+            parentId: TaskValidator.model.parentId,
             description: TaskValidator.model.description
         });
     }
 
     public static post(): RequestHandler[] {
         return TaskValidator.validationList({
+            token: BaseValidator.validators.token,
             description: TaskValidator.model.description
         });
     }
 
     public static delete(): RequestHandler[] {
         return TaskValidator.validationList({
-            id: TaskValidator.model.id
+            token: BaseValidator.validators.token,
+            id: TaskValidator.model.id,
+            parentId: TaskValidator.model.parentId
+        });
+    }
+
+    public static get(): RequestHandler[] {
+        return TaskValidator.validationList({
+            token: BaseValidator.validators.token
         });
     }
 }
