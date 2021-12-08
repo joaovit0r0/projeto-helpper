@@ -60,6 +60,11 @@ export class BaseValidator {
                 }
             },
             errorMessage: 'Nome inválido'
+        },
+        emailBase: {
+            in: 'body',
+            isEmail: true,
+            errorMessage: 'Email inválido'
         }
     };
 

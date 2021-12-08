@@ -2,7 +2,7 @@ version: '3'
 
 services:
     node:
-        container_name: riott-api
+        container_name: riott
         build: .
         volumes:
             - .:/app
@@ -10,7 +10,9 @@ services:
         environment:
             - NODE_ENV=development # Define o host, controla a exibição de logs e execução de migrations
             - PORT=8080
+            - BCRYPT_SALT_ROUNDS=10
             - MONGO_CONNECTION_URL=mongodb://riott_root:55a716fe3d2053ed61b16948@riott-mongo:27017
+            - SECRET='1mGsJbb4h6Hw092BD8SbeF4OfWJR2TSt'
         networks:
             - riott-connect
         links:
@@ -25,7 +27,7 @@ services:
         image: mongo
         command: [--auth]
         volumes:
-            - ~/docker/volumes/RIOTT_MongoDB:/data/db
+            - ~/docker/volumes/RIOTT_Mongo:/data/db
         environment:
             MONGO_INITDB_ROOT_USERNAME: riott_root
             MONGO_INITDB_ROOT_PASSWORD: 55a716fe3d2053ed61b16948

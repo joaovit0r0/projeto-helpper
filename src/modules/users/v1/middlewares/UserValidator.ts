@@ -1,6 +1,8 @@
 // Libraries
 import { RequestHandler } from 'express';
 import { Schema } from 'express-validator';
+import jwt, { JwtPayload } from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 
 // Repositories
 import { UserRepository } from '../../../../library/database/repository/UserRepository';
@@ -23,62 +25,116 @@ export class UserValidator extends BaseValidator {
      * Schema para validação no controller de usuários
      */
     private static model: Schema = {
-        name: BaseValidator.validators.name,
         id: {
             ...BaseValidator.validators.id(new UserRepository()),
             errorMessage: 'Usuário não encontrado'
         },
-        duplicate: {
-            errorMessage: 'Usuário já existe',
+        email: {
+            ...BaseValidator.validators.emailBase,
             custom: {
                 options: async (_: string, { req }) => {
                     let check = false;
 
-                    if (req.body.name) {
+                    if (req.body.email) {
                         const userRepository: UserRepository = new UserRepository();
-                        const user: User | undefined = await userRepository.findByName(req.body.name);
+                        const user: User | undefined = await userRepository.findByEmail(req.body.email);
 
-                        check = user ? req.body.id === user.id.toString() : true;
+                        req.body.userRef = user;
+
+                        check = !!user;
                     }
 
                     return check ? Promise.resolve() : Promise.reject();
+                }
+            }
+        },
+        password: {
+            errorMessage: 'Senha inválida',
+            in: 'body',
+            isStrongPassword: {
+                options: {
+                    minSymbols: 0
+                }
+            }
+        },
+        loginPassword: {
+            errorMessage: 'Senha incorreta',
+            custom: {
+                options: async (_: string, { req }) => {
+                    let check = false;
+
+                    if (req.body.userRef) {
+                        check = await bcrypt.compare(req.body.password, req.body.userRef.password);
+                    }
+
+                    return check ? Promise.resolve() : Promise.reject();
+                }
+            }
+        },
+        token: {
+            errorMessage: 'É necessário estar logado para executar está ação!',
+            in: 'headers',
+            custom: {
+                options: async (_: string, { req }) => {
+                    const authorization: string = req.headers?.authorization;
+
+                    if (!authorization) {
+                        return Promise.reject();
+                    }
+
+                    const token: string = authorization.replace('Bearer', '').trim();
+
+                    try {
+                        const secret: string = process.env.SECRET || '';
+                        const data: string | JwtPayload = jwt.verify(token, secret);
+                        req.body.userId = data;
+                    } catch {
+                        return Promise.reject();
+                    }
+
+                    const userRepository: UserRepository = new UserRepository();
+                    const user: User | undefined = await userRepository.findOne(req.body.userId.id);
+                    if (user) {
+                        return Promise.resolve();
+                    }
+                    return Promise.reject();
                 }
             }
         }
     };
 
     /**
-     * post
+     * login
      *
      * @returns Lista de validadores
      */
-    public static post(): RequestHandler[] {
+    public static login(): RequestHandler[] {
         return UserValidator.validationList({
-            name: UserValidator.model.name,
-            duplicate: UserValidator.model.duplicate
+            email: UserValidator.model.email,
+            password: UserValidator.model.loginPassword
         });
     }
 
     /**
-     * put
+     * validateToken
      *
      * @returns Lista de validadores
      */
-    public static put(): RequestHandler[] {
+    public static validateToken(): RequestHandler[] {
         return UserValidator.validationList({
-            id: UserValidator.model.id,
-            ...UserValidator.model
+            token: UserValidator.model.token
         });
     }
 
     /**
-     * onlyId
+     * signUp
      *
      * @returns Lista de validadores
      */
-    public static onlyId(): RequestHandler[] {
-        return BaseValidator.validationList({
-            id: UserValidator.model.id
+    public static signUp(): RequestHandler[] {
+        return UserValidator.validationList({
+            email: BaseValidator.validators.emailBase,
+            password: UserValidator.model.password
         });
     }
 }

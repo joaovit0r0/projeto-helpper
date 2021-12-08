@@ -1,3 +1,5 @@
+import bcrypt from 'bcrypt';
+
 /**
  * StringUtils
  *
@@ -48,5 +50,19 @@ export class StringUtils {
         }
 
         return text;
+    }
+
+    /**
+     * hashString
+     *
+     * Recebe uma string e retorna uma hash dessa string
+     *
+     * @param text Texto para ser transformado em hash
+     * @returns String contendo a hash
+     */
+    public static async hashString(text: string): Promise<string> {
+        const saltRounds: string = process.env.BCRYPT_SALT_ROUNDS || '10';
+        const salt: string = await bcrypt.genSalt(+saltRounds);
+        return bcrypt.hash(text, salt);
     }
 }
