@@ -20,7 +20,6 @@ import { Task } from '../../../../library/database/entity/Task';
 // Validators
 import { TaskValidator } from '../middlewares/TaskValidator';
 
-// TODO: Fix swagger docs
 @Controller(EnumEndpoints.TASKS_V1)
 export class TaskController extends BaseController {
     /**

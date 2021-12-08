@@ -1,6 +1,6 @@
 // Libraries
 import { RequestHandler } from 'express';
-import { Meta, Schema } from 'express-validator';
+import { Schema } from 'express-validator';
 import bcrypt from 'bcrypt';
 
 // Repositories
