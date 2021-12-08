@@ -8,7 +8,17 @@ import { TaskRepository } from '../../../../library/database/repository/TaskRepo
 // Validators
 import { BaseValidator } from '../../../../library/BaseValidator';
 
+/**
+ * TaskValidator
+ *
+ * classe de validadores para o endpoint de tasks
+ */
 export class TaskValidator extends BaseValidator {
+    /**
+     * model
+     *
+     * Schema para validação no controller de tasks
+     */
     private static model: Schema = {
         id: {
             ...BaseValidator.validators.id(new TaskRepository()),
@@ -34,6 +44,11 @@ export class TaskValidator extends BaseValidator {
         }
     };
 
+    /**
+     * put
+     *
+     * @returns Lista de validadores
+     */
     public static put(): RequestHandler[] {
         return TaskValidator.validationList({
             token: BaseValidator.validators.token,
@@ -43,6 +58,11 @@ export class TaskValidator extends BaseValidator {
         });
     }
 
+    /**
+     * post
+     *
+     * @returns Lista de validadores
+     */
     public static post(): RequestHandler[] {
         return TaskValidator.validationList({
             token: BaseValidator.validators.token,
@@ -50,6 +70,11 @@ export class TaskValidator extends BaseValidator {
         });
     }
 
+    /**
+     * delete
+     *
+     * @returns Lista de validadores
+     */
     public static delete(): RequestHandler[] {
         return TaskValidator.validationList({
             token: BaseValidator.validators.token,
@@ -58,6 +83,11 @@ export class TaskValidator extends BaseValidator {
         });
     }
 
+    /**
+     * get
+     *
+     * @returns Lista de validadores
+     */
     public static get(): RequestHandler[] {
         return TaskValidator.validationList({
             token: BaseValidator.validators.token
