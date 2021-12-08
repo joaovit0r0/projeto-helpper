@@ -67,4 +67,19 @@ export class TaskRepository extends BaseRepository {
     public delete(id: string): Promise<DeleteResult> {
         return this.getConnection().getRepository(Task).delete(id);
     }
+
+    /**
+     * findByDescription
+     *
+     * Busca uma tarefa pela descrição e id do parente
+     *
+     * @param parentId - Id do parente
+     *
+     * @param description - Descrição da tarefa
+     *
+     * @returns Tarefa buscada
+     */
+    public findByDescription(parentId: string, description: string): Promise<Task | undefined> {
+        return this.getConnection().getRepository(Task).findOne({ parentId, description });
+    }
 }
