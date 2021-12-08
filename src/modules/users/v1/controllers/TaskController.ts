@@ -9,13 +9,13 @@ import { BaseController, TaskRepository } from '../../../../library';
 import { Controller, Delete, Get, Middlewares, Post, PublicRoute, Put } from '../../../../decorators';
 
 // Models
-import { EnumEndpoints } from '../../../../models';
+import { EnumEndpoints, TFilteredTask } from '../../../../models';
 
 // Routes
 import { RouteResponse } from '../../../../routes';
 
 // Entities
-import { Task } from '../../../../library/database/entity/Task';
+import { Task } from '../../../../library/database/entity';
 
 // Validators
 import { TaskValidator } from '../middlewares/TaskValidator';
@@ -83,7 +83,7 @@ export class TaskController extends BaseController {
     @Middlewares(TaskValidator.get())
     public async get(req: Request, res: Response): Promise<void> {
         const taskRepository = new TaskRepository();
-        const tasks: Task[] = await taskRepository.getTasksByParentId(req.body.userRef.id);
+        const tasks: TFilteredTask[] = await taskRepository.getByParentId(req.body.userRef.id);
         RouteResponse.success(tasks, res);
     }
 
@@ -128,7 +128,12 @@ export class TaskController extends BaseController {
 
         await new TaskRepository().update(task);
 
-        RouteResponse.successEmpty(res);
+        const filteredTask: TFilteredTask = {
+            id: task.id,
+            description: task.description
+        };
+
+        RouteResponse.success(filteredTask, res);
     }
 
     /**

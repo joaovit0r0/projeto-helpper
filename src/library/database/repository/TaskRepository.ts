@@ -1,4 +1,5 @@
 import { DeepPartial, DeleteResult, Repository } from 'typeorm';
+import { TFilteredTask } from 'models';
 import { BaseRepository } from './BaseRepository';
 import { Task } from '../entity/Task';
 /**
@@ -35,8 +36,10 @@ export class TaskRepository extends BaseRepository {
      *
      * @returns Array contendo as tarefas
      */
-    public getTasksByParentId(parentId: string): Promise<Task[]> {
-        return this.getConnection().getRepository(Task).find({ parentId });
+    public getByParentId(parentId: string): Promise<TFilteredTask[]> {
+        return this.getConnection()
+            .getRepository(Task)
+            .find({ where: { parentId }, select: ['id', 'description'] });
     }
 
     /**
