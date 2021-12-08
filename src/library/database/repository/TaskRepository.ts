@@ -18,7 +18,7 @@ export class TaskRepository extends BaseRepository {
      *
      * Adiciona uma nova tarefa
      *
-     * @param task
+     * @param task - Tarefa
      *
      * @returns Tarefa adicionada
      */
@@ -28,11 +28,11 @@ export class TaskRepository extends BaseRepository {
     }
 
     /**
-     * getTasksByParentId
+     * getByParentId
      *
      * Retorna as tarefas que contenham a id informada
      *
-     * @param parentId string
+     * @param parentId - string
      *
      * @returns Array contendo as tarefas
      */
@@ -47,7 +47,7 @@ export class TaskRepository extends BaseRepository {
      *
      * Altera uma tarefa
      *
-     * @param task
+     * @param task - Tarefa
      *
      * @returns Tarefa alterada
      */
@@ -59,8 +59,10 @@ export class TaskRepository extends BaseRepository {
      * delete
      *
      * Remove uma tarefa pelo ID
-     * @param id
-     * @returns
+     *
+     * @param id - Id da tarefa
+     *
+     * @returns Resultado da remoção
      */
     public delete(id: string): Promise<DeleteResult> {
         return this.getConnection().getRepository(Task).delete(id);
