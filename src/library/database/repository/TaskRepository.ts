@@ -19,10 +19,10 @@ export class TaskRepository extends BaseRepository {
      *
      * @param task
      *
-     * @returns Tarefa adicionado
+     * @returns Tarefa adicionada
      */
     public insert(task: DeepPartial<Task>): Promise<Task> {
-        const taskRepository: Repository<Task> = this.getConnection().getTreeRepository(Task);
+        const taskRepository: Repository<Task> = this.getConnection().getRepository(Task);
         return taskRepository.save(taskRepository.create(task));
     }
 
@@ -36,7 +36,7 @@ export class TaskRepository extends BaseRepository {
      * @returns Array contendo as tarefas
      */
     public getTasksByParentId(parentId: string): Promise<Task[]> {
-        return this.getConnection().getRepository(Task).createQueryBuilder('task').where('task.parentId = :id', { id: parentId }).getMany();
+        return this.getConnection().getRepository(Task).find({ parentId });
     }
 
     /**
