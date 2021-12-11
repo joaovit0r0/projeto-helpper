@@ -1,7 +1,6 @@
 // Libraries
 import { RequestHandler } from 'express';
 import { Schema } from 'express-validator';
-import jwt, { JwtPayload } from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 
 // Repositories
@@ -68,36 +67,6 @@ export class UserValidator extends BaseValidator {
                     }
 
                     return check ? Promise.resolve() : Promise.reject();
-                }
-            }
-        },
-        token: {
-            errorMessage: 'É necessário estar logado para executar está ação!',
-            in: 'headers',
-            custom: {
-                options: async (_: string, { req }) => {
-                    const authorization: string = req.headers?.authorization;
-
-                    if (!authorization) {
-                        return Promise.reject();
-                    }
-
-                    const token: string = authorization.replace('Bearer', '').trim();
-
-                    try {
-                        const secret: string = process.env.SECRET || '';
-                        const data: string | JwtPayload = jwt.verify(token, secret);
-                        req.body.userId = data;
-                    } catch {
-                        return Promise.reject();
-                    }
-
-                    const userRepository: UserRepository = new UserRepository();
-                    const user: User | undefined = await userRepository.findOne(req.body.userId.id);
-                    if (user) {
-                        return Promise.resolve();
-                    }
-                    return Promise.reject();
                 }
             }
         }
