@@ -8,3 +8,4 @@ export * from './IGetListParams';
 export * from './ILogger';
 export * from './IRouteDef';
 export * from './TObject';
+export * from './TFilteredMember';

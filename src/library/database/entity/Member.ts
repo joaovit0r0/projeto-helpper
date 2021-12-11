@@ -40,6 +40,7 @@ export class Member extends BaseEntity {
     @BeforeInsert()
     @BeforeUpdate()
     public checkAllowance(): void {
-        this.allowance = Math.max(0, this.allowance);
+        const allowance: number = +this.allowance.toFixed(2);
+        this.allowance = Math.max(0, allowance);
     }
 }

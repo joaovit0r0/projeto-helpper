@@ -1,6 +1,21 @@
 /**
  * @swagger
  * components:
+ *   schemas:
+ *     member:
+ *       type: object
+ *       properties:
+ *         name:
+ *           type: string
+ *         photo:
+ *           type: string
+ *           format: base64
+ *         birthdate:
+ *           type: string
+ *           format: date-time
+ *         allowance:
+ *           type: number
+ *           minimum: 0
  *   responses:
  *     '200':
  *       description: 'Requisição executada com sucesso'
