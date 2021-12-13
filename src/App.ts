@@ -162,7 +162,15 @@ export class App {
      */
     private configSwagger(options: swaggerJSDoc.OAS3Options | undefined): void {
         if (options) {
-            this.app.use('/swagger', swaggerUI.serve, swaggerUI.setup(swaggerJSDoc(options)));
+            const swaggerSpec = swaggerJSDoc(options);
+            this.app.use('/swagger', swaggerUI.serve, swaggerUI.setup(swaggerSpec));
+
+            // eslint-disable-next-line func-names
+            this.app.get('/swagger.json', function (_: any, res: Response): void {
+                res.setHeader('Content-Type', 'application/json');
+                res.send(swaggerSpec);
+            });
+
             this.appDef.logger.log(`Add swagger on /swagger`);
         }
     }
