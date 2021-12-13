@@ -150,6 +150,24 @@ export class MemberValidator extends BaseValidator {
     }
 
     /**
+     * patch
+     *
+     * @returns Lista de validadores
+     */
+    public static patch(): RequestHandler[] {
+        return MemberValidator.validationList({
+            token: BaseValidator.validators.token,
+            id: MemberValidator.model.id,
+            belongsToParent: MemberValidator.model.belongsToParent,
+            minOneProperty: MemberValidator.model.minOneProperty,
+            name: { ...MemberValidator.model.name, optional: true },
+            birthdate: { ...MemberValidator.model.birthdate, optional: true },
+            allowance: { ...MemberValidator.model.allowance, optional: true },
+            photo: { ...MemberValidator.model.photo, optional: true }
+        });
+    }
+
+    /**
      * delete
      *
      * @returns Lista de validadores
