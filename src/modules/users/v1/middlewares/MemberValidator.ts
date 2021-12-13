@@ -140,7 +140,9 @@ export class MemberValidator extends BaseValidator {
     public static put(): RequestHandler[] {
         return MemberValidator.validationList({
             token: BaseValidator.validators.token,
-            parentId: MemberValidator.model.parentId,
+            id: MemberValidator.model.id,
+            belongsToParent: MemberValidator.model.belongsToParent,
+            photo: MemberValidator.model.photo,
             name: MemberValidator.model.name,
             birthdate: MemberValidator.model.birthdate,
             allowance: MemberValidator.model.allowance
