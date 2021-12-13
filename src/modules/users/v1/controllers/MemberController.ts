@@ -267,9 +267,11 @@ export class MemberController extends BaseController {
      */
     @Delete('/:id')
     @PublicRoute()
-    @Middlewares()
+    @Middlewares(MemberValidator.delete())
     public async remove(req: Request, res: Response): Promise<void> {
         const { id } = req.params;
+
+        FileUtils.deleteMulterImage(req.body.memberRef.photo);
 
         await new MemberRepository().delete(id);
 
