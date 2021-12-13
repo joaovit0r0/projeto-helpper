@@ -175,7 +175,7 @@ export class MemberValidator extends BaseValidator {
     public static delete(): RequestHandler[] {
         return MemberValidator.validationList({
             token: BaseValidator.validators.token,
-            parentId: MemberValidator.model.parentId
+            id: MemberValidator.model.id
         });
     }
 }
