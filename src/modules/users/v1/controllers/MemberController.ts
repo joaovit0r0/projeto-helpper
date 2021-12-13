@@ -164,7 +164,18 @@ export class MemberController extends BaseController {
     @PublicRoute()
     @Middlewares(MemberValidator.put())
     public async update(req: Request, res: Response): Promise<void> {
-        const member: Member = req.body.memberRef;
+        FileUtils.deleteMulterImage(req.body.memberRef.photo);
+
+        const imgFilename: string | null = FileUtils.saveMulterImage(req, res);
+        if (!imgFilename) return;
+
+        const member: Member = {
+            ...req.body.memberRef,
+            name: req.body.name,
+            photo: imgFilename,
+            birthdate: req.body.birthdate,
+            allowance: req.body.allowance
+        };
 
         await new MemberRepository().update(member);
 
