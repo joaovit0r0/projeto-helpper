@@ -41,19 +41,23 @@ export class MemberController extends BaseController {
      *             properties:
      *               name:
      *                 type: string
+     *                 example: Alex
      *               photo:
      *                 type: string
      *                 format: base64
      *               birthdate:
      *                 type: string
-     *                 format: date-time
+     *                 format: date
+     *                 example: 12/05/2005
      *               allowance:
      *                 type: number
+     *                 format: float
      *                 minimum: 0
+     *                 example: 125.25
      *             required:
      *               - name
-     *               - birthdate
      *               - photo
+     *               - birthdate
      *               - allowance
      *             encoding:
      *               photo:
@@ -94,7 +98,7 @@ export class MemberController extends BaseController {
      *     security:
      *       - BearerAuth: []
      *     responses:
-     *       $ref: '#/components/responses/baseEmpty'
+     *       $ref: '#/components/responses/userGetMembers'
      */
     @Get()
     @PublicRoute()
@@ -112,25 +116,42 @@ export class MemberController extends BaseController {
      *     summary: Altera o membro com o id informado
      *     tags: [Members]
      *     consumes:
-     *       - application/json
+     *       - multipart/form-data
      *     produces:
      *       - application/json
      *     requestBody:
      *       content:
-     *         application/json:
+     *         multipart/form-data:
      *           schema:
      *             type: object
-     *             example:
-     *               id: 61b016a680817a00379f1e4c
-     *               description: some description
-     *             required:
-     *               - id
-     *               - description
      *             properties:
      *               id:
      *                 type: string
-     *               description:
+     *                 example: 61b7268110ff150035028b33
+     *               name:
      *                 type: string
+     *                 example: Alex
+     *               photo:
+     *                 type: string
+     *                 format: base64
+     *               birthdate:
+     *                 type: string
+     *                 format: date
+     *                 example: 12/05/2005
+     *               allowance:
+     *                 type: number
+     *                 format: float
+     *                 minimum: 0
+     *                 example: 125.25
+     *             required:
+     *               - id
+     *               - name
+     *               - photo
+     *               - birthdate
+     *               - allowance
+     *             encoding:
+     *               photo:
+     *                 contentType: image/png, image/jpeg
      *     security:
      *       - BearerAuth: []
      *     responses:
