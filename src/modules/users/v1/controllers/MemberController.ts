@@ -8,7 +8,7 @@ import { FileUtils } from '../../../../utils';
 import { BaseController, MemberRepository } from '../../../../library';
 
 // Decorators
-import { Controller, Delete, Get, Middlewares, Post, PublicRoute, Put } from '../../../../decorators';
+import { Controller, Delete, Get, Middlewares, Patch, Post, PublicRoute, Put } from '../../../../decorators';
 
 // Models
 import { EnumEndpoints, TFilteredMember } from '../../../../models';
@@ -167,6 +167,79 @@ export class MemberController extends BaseController {
         const member: Member = req.body.memberRef;
 
         await new MemberRepository().update(member);
+
+        RouteResponse.successEmpty(res);
+    }
+
+    /**
+     * @swagger
+     * /v1/user/members:
+     *   patch:
+     *     summary: Altera uma ou mais propriedades do membro com o id informado
+     *     tags: [Members]
+     *     consumes:
+     *       - multipart/form-data
+     *     produces:
+     *       - application/json
+     *     requestBody:
+     *       content:
+     *         multipart/form-data:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               id:
+     *                 type: string
+     *                 example: 61b7268110ff150035028b33
+     *               name:
+     *                 type: string
+     *                 example: Alex
+     *               photo:
+     *                 type: string
+     *                 format: base64
+     *               birthdate:
+     *                 type: string
+     *                 format: date
+     *                 example: 12/05/2005
+     *               allowance:
+     *                 type: number
+     *                 format: float
+     *                 minimum: 0
+     *                 example: 125.25
+     *             required:
+     *               - id
+     *             encoding:
+     *               photo:
+     *                 contentType: image/png, image/jpeg
+     *     security:
+     *       - BearerAuth: []
+     *     responses:
+     *       $ref: '#/components/responses/baseEmpty'
+     */
+    @Patch()
+    @PublicRoute()
+    @Middlewares(MemberValidator.patch())
+    public async patch(req: Request, res: Response): Promise<void> {
+        const name: string = req.body.name || req.body.memberRef.name;
+        const birthdate: string = req.body.birthdate || req.body.memberRef.birthdate;
+        const allowance: number = req.body.allowance || req.body.memberRef.allowance;
+        let { photo } = req.body.memberRef;
+
+        if (req.file) {
+            FileUtils.deleteMulterImage(photo);
+            const filename = FileUtils.saveMulterImage(req, res);
+            if (!filename) return;
+            photo = filename;
+        }
+
+        const updatedMember: Member = {
+            ...req.body.memberRef,
+            name,
+            birthdate,
+            photo,
+            allowance
+        };
+
+        await new MemberRepository().update(updatedMember);
 
         RouteResponse.successEmpty(res);
     }
