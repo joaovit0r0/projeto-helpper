@@ -4,6 +4,7 @@ import { DeepPartial } from 'typeorm';
 import { upload } from '../../../../config/multer';
 
 // Library
+import { FileUtils } from '../../../../utils';
 import { BaseController, MemberRepository } from '../../../../library';
 
 // Decorators
@@ -69,20 +70,22 @@ export class MemberController extends BaseController {
      */
     @Post()
     @PublicRoute()
-    @Middlewares()
+    @Middlewares(MemberValidator.post())
     public async create(req: Request, res: Response): Promise<void> {
-        const a = req.file?.buffer as any;
-        console.log(a);
-        // const member: DeepPartial<Member> = {
-        //     name: req.body.name,
-        //     photo: req.file?.path,
-        //     parentId: req.body.userRef.id,
-        //     birthdate: req.body.birthdate,
-        //     allowance: req.body.allowance
-        // };
-        // console.log('aa');
-        // await new MemberRepository().insert(member);
-        RouteResponse.successEmpty(res);
+        const imgFilename: string | null = FileUtils.saveMulterImage(req, res);
+        if (!imgFilename) return;
+
+        const { birthdate, allowance, name, userRef } = req.body;
+        const member: DeepPartial<Member> = {
+            name,
+            photo: imgFilename,
+            parentId: userRef.id,
+            birthdate,
+            allowance
+        };
+
+        await new MemberRepository().insert(member);
+        RouteResponse.successCreate(res);
     }
 
     /**

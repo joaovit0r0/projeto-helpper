@@ -22,7 +22,7 @@ export class MemberValidator extends BaseValidator {
     private static model: Schema = {
         id: {
             ...BaseValidator.validators.id(new MemberRepository()),
-            errorMessage: 'Usuário não encontrado'
+            errorMessage: 'Membro não encontrado'
         },
         name: {
             errorMessage: 'Nome inválido',
@@ -34,20 +34,19 @@ export class MemberValidator extends BaseValidator {
             },
             custom: {
                 options: (_: string, { req }: Meta): Promise<void> => {
-                    return req.body.name.match(/[^a-zA-Z\s]/gim) ? Promise.reject() : Promise.resolve();
+                    return req.body.name.match(/[^a-z\s]/gim) ? Promise.reject() : Promise.resolve();
                 }
             }
         },
         photo: {
             errorMessage: 'Foto inválida',
-            in: 'body',
             custom: {
-                options: (_: string, { req }: Meta) => {
+                options: (_: string, { req }: Meta): Promise<void> => {
                     return req.file ? Promise.resolve() : Promise.reject();
                 }
             }
         },
-        parentId: {
+        belongsToParent: {
             errorMessage: 'Membro não pertence ao usuário',
             custom: {
                 options: async (_: string, { req }: Meta): Promise<void> => {
@@ -92,6 +91,16 @@ export class MemberValidator extends BaseValidator {
                 options: (value: string) => {
                     const allowance = +parseFloat(value).toFixed(2);
                     return Math.max(0, allowance);
+                }
+            }
+        },
+        minOneProperty: {
+            errorMessage: 'É necessário informar no mínimo uma propriedade',
+            custom: {
+                options: (_: string, { req }: Meta) => {
+                    const { name, birthdate, allowance } = req.body;
+                    const { file } = req;
+                    return !!name || !!birthdate || !!allowance || !!file;
                 }
             }
         }
