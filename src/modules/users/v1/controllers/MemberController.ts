@@ -1,7 +1,6 @@
 // Modules
 import { Request, Response } from 'express';
 import { DeepPartial } from 'typeorm';
-import { upload } from '../../../../config/multer';
 
 // Library
 import { FileUtils } from '../../../../utils';
@@ -109,6 +108,7 @@ export class MemberController extends BaseController {
     public async get(req: Request, res: Response): Promise<void> {
         const memberRepository = new MemberRepository();
         const members: TFilteredMember[] = await memberRepository.findByParentId(req.body.userRef.id);
+
         RouteResponse.success(members, res);
     }
 
