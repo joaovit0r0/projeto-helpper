@@ -1,7 +1,7 @@
 // Modules
 import compression from 'compression';
 import cors from 'cors';
-import express, { Application } from 'express';
+import express, { Application, Response } from 'express';
 import helmet from 'helmet';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUI from 'swagger-ui-express';
