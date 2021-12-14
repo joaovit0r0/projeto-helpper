@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { createHash } from 'crypto';
 import { unlinkSync, writeFileSync } from 'fs';
 import { StringUtils } from './StringUtils';
 
@@ -21,8 +22,9 @@ export class FileUtils {
         const fileBuffer = req.file?.buffer as Buffer;
         const path: string = process.env.IMAGES_PATH || '/uploads/';
         const uniqueSuffix: string = StringUtils.generateRandomSuffix();
+        const fileHash = `${createHash('md5').update(fileBuffer.toString('base64')).digest('hex')}`;
         const fileExtension = req.file?.originalname.split('.').pop() as string;
-        const filename = `${req.file?.fieldname}-${uniqueSuffix}.${fileExtension}`;
+        const filename = `${fileHash}-${uniqueSuffix}.${fileExtension}`;
         const fullFilePath = `${path}${filename}`;
 
         try {
