@@ -2,11 +2,12 @@
 import compression from 'compression';
 import cors from 'cors';
 import express, { Application, Response } from 'express';
-import fileMiddleware from 'express-multipart-file-parser';
 import helmet from 'helmet';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUI from 'swagger-ui-express';
 import { ConnectionOptions } from 'typeorm';
+import { existsSync, mkdirSync } from 'fs';
+import { upload } from './config/multer';
 
 // Routes
 import { TClass, RoutesController, RouteResponse } from './routes';
@@ -42,6 +43,7 @@ export class App {
         this.setRoutes(config.controllers);
         this.setAssets(config.assets);
         this.configSwagger(config.swaggerOptions);
+        this.checkForImagesPath();
         this.setExtraMiddlewares();
     }
 
@@ -70,7 +72,9 @@ export class App {
         this.app.use(express.urlencoded({ limit: '50mb', extended: true }));
         this.app.use(cors({ origin: true })); // Automaticamente habilita cross-origin requests
         this.app.use(compression()); // Compressão GZIP
-        this.app.use(fileMiddleware); // Trata arquivos enviados para rota e adiciona no express.req
+        const path: string = process.env.IMAGES_PATH || '/uploads/';
+        this.app.use(express.static(path)); // Expõe a pasta de imagens para a api
+        this.app.use(upload.single('photo')); // Trata arquivos enviados para rota e adiciona no express.req
 
         // Middlewares externos
         if (middlewares) {
@@ -98,6 +102,26 @@ export class App {
     private setExtraMiddlewares(): void {
         this.app.use('*', (req: express.Request, res: express.Response) => RouteResponse.notFound(req, res)); // not found 404
         this.app.use(RouteResponse.serverError); // internal server error
+    }
+
+    /**
+     * checkForImagePath
+     *
+     * Checa se o caminho para salvar arquivos existe
+     * Caso não exista, cria o caminho especificado
+     */
+    private checkForImagesPath(): void {
+        const path: string = process.env.IMAGES_PATH || '/uploads/';
+        if (!existsSync(path)) {
+            this.appDef.logger.log(`Creating upload path for images: ${path}`);
+            try {
+                mkdirSync(path);
+                this.appDef.logger.log(`Upload path created successfully`);
+            } catch (error) {
+                this.appDef.logger.error(`Couldn't create path ${path}`);
+                this.appDef.logger.error(error);
+            }
+        }
     }
 
     /**

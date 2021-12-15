@@ -3,14 +3,34 @@
  * components:
  *   schemas:
  *     task:
+ *       example: 61b016a680817a00379f1e4c
+ *       description:
+ *         type: string
+ *         example: some description
+ *     member:
  *       type: object
  *       properties:
  *         id:
  *           type: string
- *           example: 61b016a680817a00379f1e4c
- *         description:
+ *           example: 61b7268110ff150035028b33
+ *         name:
  *           type: string
- *           example: some description
+ *           example: Alex
+ *         photo:
+ *           type: string
+ *           example: image.jpeg
+ *         birthdate:
+ *           type: string
+ *           format: date
+ *           example: 12/05/2005
+ *         allowance:
+ *           type: number
+ *           format: float
+ *           minimum: 0
+ *           example: 125.25
+ *       encoding:
+ *         photo:
+ *           contentType: image/png, image/jpeg
  *   responses:
  *     '200':
  *       description: 'Requisição executada com sucesso'
@@ -189,6 +209,24 @@
  *                   format: date-time
  *                 data:
  *                   $ref: '#/components/schemas/task'
+ *     userGetMembers:
+ *       '200':
+ *         description: 'Requisição executada com sucesso'
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: boolean
+ *                   example: true
+ *                 date:
+ *                   type: string
+ *                   format: date-time
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/member'
  *       '400':
  *         $ref: '#/components/responses/400'
  *       '401':
