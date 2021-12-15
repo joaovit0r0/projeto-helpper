@@ -6,11 +6,11 @@ import { dbConfig } from './config/database';
 import { swaggerConfig } from './config/swagger';
 
 // Endpoints
-import { TaskController, UserController } from './modules/users/v1';
+import { ListController, TaskController, UserController } from './modules/users/v1';
 
 const app: App = new App({
     port: Number(process.env.PORT || 8080),
-    controllers: [UserController, TaskController],
+    controllers: [UserController, TaskController, ListController],
     middlewares: [Logger.middleware],
     logger: new Logger(),
     swaggerOptions: process.env.NODE_ENV === 'development' ? swaggerConfig : undefined,

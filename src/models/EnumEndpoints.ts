@@ -1,4 +1,5 @@
 export enum EnumEndpoints {
     USER_V1 = '/v1/user',
-    TASKS_V1 = '/v1/user/tasks'
+    TASKS_V1 = '/v1/user/tasks',
+    LISTS_V1 = '/v1/user/lists'
 }
