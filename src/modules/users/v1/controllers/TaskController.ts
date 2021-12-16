@@ -116,7 +116,7 @@ export class TaskController extends BaseController {
      *     security:
      *       - BearerAuth: []
      *     responses:
-     *       $ref: '#/components/responses/taskPut'
+     *       $ref: '#/components/responses/baseResponse'
      */
     @Put()
     @PublicRoute()
