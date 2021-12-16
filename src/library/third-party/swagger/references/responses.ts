@@ -193,22 +193,6 @@
  *         $ref: '#/components/responses/401'
  *       '500':
  *         $ref: '#/components/responses/500'
- *     taskPut:
- *       '200':
- *         description: 'Task atualizada com sucesso'
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: boolean
- *                   example: true
- *                 date:
- *                   type: string
- *                   format: date-time
- *                 data:
- *                   $ref: '#/components/schemas/task'
  *     userGetMembers:
  *       '200':
  *         description: 'Requisição executada com sucesso'
