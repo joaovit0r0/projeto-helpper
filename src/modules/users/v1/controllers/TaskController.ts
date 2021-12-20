@@ -6,7 +6,7 @@ import { DeepPartial } from 'typeorm';
 import { BaseController, TaskRepository } from '../../../../library';
 
 // Decorators
-import { Controller, Delete, Get, Middlewares, Post, PublicRoute, Put } from '../../../../decorators';
+import { Controller, Delete, Get, Middlewares, Post, Put } from '../../../../decorators';
 
 // Models
 import { EnumEndpoints, TFilteredTask } from '../../../../models';
@@ -50,7 +50,6 @@ export class TaskController extends BaseController {
      *       $ref: '#/components/responses/baseCreate'
      */
     @Post()
-    @PublicRoute()
     @Middlewares(TaskValidator.post())
     public async create(req: Request, res: Response): Promise<void> {
         const task: DeepPartial<Task> = {
@@ -79,7 +78,6 @@ export class TaskController extends BaseController {
      *       $ref: '#/components/responses/taskGet'
      */
     @Get()
-    @PublicRoute()
     @Middlewares(TaskValidator.get())
     public async get(req: Request, res: Response): Promise<void> {
         const taskRepository = new TaskRepository();
@@ -119,7 +117,6 @@ export class TaskController extends BaseController {
      *       $ref: '#/components/responses/baseResponse'
      */
     @Put()
-    @PublicRoute()
     @Middlewares(TaskValidator.put())
     public async update(req: Request, res: Response): Promise<void> {
         const task: Task = req.body.taskRef;
@@ -158,7 +155,6 @@ export class TaskController extends BaseController {
      *       $ref: '#/components/responses/baseEmpty'
      */
     @Delete('/:id')
-    @PublicRoute()
     @Middlewares(TaskValidator.delete())
     public async remove(req: Request, res: Response): Promise<void> {
         const { id } = req.params;
