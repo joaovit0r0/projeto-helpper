@@ -9,3 +9,4 @@ export * from './ILogger';
 export * from './IRouteDef';
 export * from './TObject';
 export * from './TFilteredMember';
+export * from './TFilteredTask';

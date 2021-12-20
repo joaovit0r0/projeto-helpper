@@ -1,4 +1,6 @@
 export enum EnumEndpoints {
     USER_V1 = '/v1/user',
-    MEMBERS_V1 = '/v1/user/members'
+    LISTS_V1 = '/v1/user/lists',
+    MEMBERS_V1 = '/v1/user/members',
+    TASKS_V1 = '/v1/user/tasks'
 }

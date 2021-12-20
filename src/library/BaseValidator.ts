@@ -91,6 +91,7 @@ export class BaseValidator {
 
                     const userRepository: UserRepository = new UserRepository();
                     const user: User | undefined = await userRepository.findOne(req.body.userData.id);
+
                     if (user) {
                         req.body.userRef = user;
                         return Promise.resolve();

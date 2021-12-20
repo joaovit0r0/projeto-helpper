@@ -4,7 +4,6 @@ import { DeepPartial } from 'typeorm';
 
 // Library
 import jwt from 'jsonwebtoken';
-import { BaseController, User, UserRepository } from '../../../../library';
 
 // Decorators
 import { Controller, Middlewares, Post, PublicRoute } from '../../../../decorators';
@@ -14,6 +13,9 @@ import { EnumEndpoints } from '../../../../models';
 
 // Routes
 import { RouteResponse } from '../../../../routes';
+
+// Entities
+import { BaseController, User, UserRepository } from '../../../../library';
 
 // Validators
 import { UserValidator } from '../middlewares/UserValidator';
