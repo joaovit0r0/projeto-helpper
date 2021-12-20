@@ -2,12 +2,21 @@
  * @swagger
  * components:
  *   schemas:
+ *     task:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           example: 61b016a680817a00379f1e4c
+ *         description:
+ *           type: string
+ *           example: some description
  *     member:
  *       type: object
  *       properties:
  *         id:
  *           type: string
- *           example: 61b7268110ff150035028b33
+ *           example: 61b016a680817a00379f1e4c
  *         name:
  *           type: string
  *           example: Alex
@@ -164,6 +173,31 @@
  *         $ref: '#/components/responses/401'
  *       '500':
  *         $ref: '#/components/responses/500'
+
+ *     taskGet:
+ *       '200':
+ *         description: 'Requisição executada com sucesso'
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: boolean
+ *                   example: true
+ *                 date:
+ *                   type: string
+ *                   format: date-time
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/task'
+ *       '400':
+ *         $ref: '#/components/responses/400'
+ *       '401':
+ *         $ref: '#/components/responses/401'
+ *       '500':
+ *         $ref: '#/components/responses/500'
  *     userGetMembers:
  *       '200':
  *         description: 'Requisição executada com sucesso'
@@ -174,6 +208,7 @@
  *               properties:
  *                 status:
  *                   type: boolean
+ *                   example: true
  *                 date:
  *                   type: string
  *                   format: date-time

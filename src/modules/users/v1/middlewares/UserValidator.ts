@@ -91,7 +91,7 @@ export class UserValidator extends BaseValidator {
      */
     public static validateToken(): RequestHandler[] {
         return UserValidator.validationList({
-            token: UserValidator.model.token
+            token: BaseValidator.validators.token
         });
     }
 
