@@ -13,6 +13,8 @@ services:
             - BCRYPT_SALT_ROUNDS=10
             - MONGO_CONNECTION_URL=mongodb://riott_root:55a716fe3d2053ed61b16948@riott-mongo:27017
             - SECRET='1mGsJbb4h6Hw092BD8SbeF4OfWJR2TSt'
+            - IMAGES_PATH=/uploads/
+            - MAX_IMAGE_SIZE=10000000
         networks:
             - riott-connect
         links:
