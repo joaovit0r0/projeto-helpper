@@ -11,6 +11,30 @@
  *         description:
  *           type: string
  *           example: some description
+ *     member:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           example: 61b016a680817a00379f1e4c
+ *         name:
+ *           type: string
+ *           example: Alex
+ *         photo:
+ *           type: string
+ *           example: image.jpeg
+ *         birthdate:
+ *           type: string
+ *           format: date
+ *           example: 12/05/2005
+ *         allowance:
+ *           type: number
+ *           format: float
+ *           minimum: 0
+ *           example: 125.25
+ *       encoding:
+ *         photo:
+ *           contentType: image/png, image/jpeg
  *   responses:
  *     '200':
  *       description: 'Requisição executada com sucesso'
@@ -149,6 +173,7 @@
  *         $ref: '#/components/responses/401'
  *       '500':
  *         $ref: '#/components/responses/500'
+
  *     taskGet:
  *       '200':
  *         description: 'Requisição executada com sucesso'
@@ -167,6 +192,30 @@
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/task'
+ *       '400':
+ *         $ref: '#/components/responses/400'
+ *       '401':
+ *         $ref: '#/components/responses/401'
+ *       '500':
+ *         $ref: '#/components/responses/500'
+ *     userGetMembers:
+ *       '200':
+ *         description: 'Requisição executada com sucesso'
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: boolean
+ *                   example: true
+ *                 date:
+ *                   type: string
+ *                   format: date-time
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/member'
  *       '400':
  *         $ref: '#/components/responses/400'
  *       '401':

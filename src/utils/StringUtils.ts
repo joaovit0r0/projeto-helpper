@@ -65,4 +65,15 @@ export class StringUtils {
         const salt: string = await bcrypt.genSalt(+saltRounds);
         return bcrypt.hash(text, salt);
     }
+
+    /**
+     * generateRandomSuffix
+     *
+     * Gera uma string aleatória e a retorna
+     *
+     * @returns String aleatória
+     */
+    public static generateRandomSuffix(): string {
+        return `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    }
 }
