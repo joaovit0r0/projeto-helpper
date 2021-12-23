@@ -1,5 +1,6 @@
-import { DeepPartial, DeleteResult, Repository } from 'typeorm';
+import { DeepPartial, DeleteResult, ObjectID as ObjectIDType, Repository } from 'typeorm';
 import { TFilteredTask } from 'models';
+import { ObjectID } from 'mongodb';
 import { BaseRepository } from './BaseRepository';
 import { Task } from '../entity/Task';
 /**
@@ -81,5 +82,21 @@ export class TaskRepository extends BaseRepository {
      */
     public findByDescription(parentId: string, description: string): Promise<Task | undefined> {
         return this.getConnection().getRepository(Task).findOne({ parentId, description });
+    }
+
+    /**
+     * findByIds
+     *
+     * Busca por tadas as tarefas com os ids contidos no array e pelo id do parente
+     *
+     * @param ids - Array com os ids
+     * @param parentId - Id do parente
+     * @returns Array de tarefas
+     */
+    public findByIds(ids: string[], parentId: string): Promise<Task[]> {
+        const objectIdArray: ObjectIDType[] = ids.map(ObjectID);
+        return this.getConnection()
+            .getRepository(Task)
+            .find({ where: { _id: { $in: objectIdArray }, parentId } });
     }
 }
