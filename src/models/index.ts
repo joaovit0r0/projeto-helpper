@@ -10,3 +10,5 @@ export * from './IRouteDef';
 export * from './TObject';
 export * from './TFilteredMember';
 export * from './TFilteredTask';
+export * from './EnumListStatus';
+export * from './TInputTask';
