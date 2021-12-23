@@ -2,11 +2,55 @@
  * @swagger
  * components:
  *   schemas:
+ *     list:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           example: 61b016a680817a00379f1e4c
+ *         name:
+ *           type: string
+ *           example: Lista de abril
+ *         status:
+ *           type: string
+ *           enum: ['A', 'S', 'F']
+ *           example: F
+ *         memberId:
+ *           type: string
+ *           example: 61b7268110ff150035028b33
+ *         startDate:
+ *           type: string
+ *           format: date
+ *           example: 01/04/2021
+ *         completionDate:
+ *           type: string
+ *           format: date
+ *           example: 30/04/2021
+ *     composedTask:
+ *       description: Entidade para fazer a ligação entre uma task e uma lista
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           example: 61b016a680817a00379f1e4c
+ *         listId:
+ *           type: string
+ *           example: 61b016a680817a00379f1e4c
+ *         taskId:
+ *           type: string
+ *           example: 61b016a680817a00379f1e4c
+ *         value:
+ *           type: number
+ *           example: 10
  *     task:
- *       example: 61b016a680817a00379f1e4c
- *       description:
- *         type: string
- *         example: some description
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           example: 61b016a680817a00379f1e4c
+ *         description:
+ *           type: string
+ *           example: some description
  *     member:
  *       type: object
  *       properties:
