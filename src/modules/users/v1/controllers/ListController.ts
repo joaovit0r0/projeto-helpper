@@ -240,7 +240,7 @@ export class ListController extends BaseController {
             const { status, completionDate, tasks } = req.body;
             newList = { ...req.body.listRef, status, completionDate, tasks };
         }
-        if (newList) {
+        if (Object.keys(newList).length !== 0) {
             await new ListRepository().update(newList);
             RouteResponse.successEmpty(res);
         } else {
