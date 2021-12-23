@@ -4,13 +4,13 @@ import { Request, Response } from 'express';
 import { DeepPartial } from 'typeorm';
 
 // Library
-import { BaseController } from '../../../../library';
-
+import { BaseController, ComposedTask, ComposedTaskRepository, List, ListRepository, TaskRepository } from '../../../../library';
+import { Task } from '../../../../library/database/entity/Task';
 // Decorators
-import { Controller, Delete, Get, Middlewares, Patch, Post, PublicRoute, Put } from '../../../../decorators';
+import { Controller, Delete, Get, Middlewares, Post, Put } from '../../../../decorators';
 
 // Models
-import { EnumEndpoints } from '../../../../models';
+import { EnumEndpoints, EnumListStatus, TInputTask } from '../../../../models';
 
 // Routes
 import { RouteResponse } from '../../../../routes';
@@ -33,45 +33,66 @@ export class ListController extends BaseController {
      *     produces:
      *       - application/json
      *     requestBody:
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               name:
+     *                 type: string
+     *                 example: Tarefas de abril
+     *               memberId:
+     *                 type: string
+     *                 example: 61b016a680817a00379f1e4c
+     *               tasks:
+     *                 type: array
+     *                 items:
+     *                   type: object
+     *                   properties:
+     *                     taskId:
+     *                       type: string
+     *                       example: 61b016a680817a00379f1e4c
+     *                     value:
+     *                       type: number
+     *                       example: 10
      *     security:
      *       - BearerAuth: []
      *     responses:
      *       $ref: '#/components/responses/baseCreate'
      */
     @Post()
-    @PublicRoute()
     @Middlewares(ListValidator.post())
     public async create(req: Request, res: Response): Promise<void> {
-        RouteResponse.successEmpty(res);
+        const newList: DeepPartial<List> = {
+            name: req.body.name,
+            status: 'A',
+            memberId: req.body.memberId,
+            startDate: req.body.startDate
+        };
+
+        const { id } = await new ListRepository().insert(newList);
+
+        const newTasks: ComposedTask[] = req.body.tasks.map((task: TInputTask) => {
+            const newTask: DeepPartial<ComposedTask> = {
+                listId: `${id}`,
+                taskId: task.taskId,
+                value: task.value,
+                missed: false
+            };
+
+            return newTask;
+        });
+
+        await new ComposedTaskRepository().insertMany(newTasks);
+
+        RouteResponse.successCreate(res);
     }
 
     /**
      * @swagger
-     * /v1/user/lists:
+     * /v1/user/lists/{memberId}/active:
      *   get:
-     *     summary: Retorna todas as listas de um usuário
-     *     tags: [Lists]
-     *     consumes:
-     *       - application/json
-     *     produces:
-     *       - application/json
-     *     security:
-     *       - BearerAuth: []
-     *     responses:
-     *       $ref: '#/components/responses/taskGet'
-     */
-    @Get()
-    @PublicRoute()
-    @Middlewares(ListValidator.get())
-    public async get(req: Request, res: Response): Promise<void> {
-        RouteResponse.successEmpty(res);
-    }
-
-    /**
-     * @swagger
-     * /v1/user/lists/{listId}:
-     *   get:
-     *     summary: Retorna todas as listas de um usuário
+     *     summary: Retorna a lista ativa de um membro
      *     tags: [Lists]
      *     consumes:
      *       - application/json
@@ -79,20 +100,84 @@ export class ListController extends BaseController {
      *       - application/json
      *     parameters:
      *       - in: path
-     *         name: listId
+     *         name: memberId
      *         schema:
      *           type: string
      *         required: true
      *     security:
      *       - BearerAuth: []
      *     responses:
-     *       $ref: '#/components/responses/taskGet'
+     *       $ref: '#/components/responses/baseResponse'
      */
-    @Get()
-    @PublicRoute()
-    @Middlewares(ListValidator.getAllLists())
-    public async getAll(req: Request, res: Response): Promise<void> {
-        RouteResponse.successEmpty(res);
+    @Get('/:id/active')
+    @Middlewares(ListValidator.get())
+    public async getActiveList(req: Request, res: Response): Promise<void> {
+        const list: List | undefined = await new ListRepository().getMemberActiveList(req.params.id);
+        const tasks: ComposedTask[] = await new ComposedTaskRepository().getTasksByListId(`${list?.id}`);
+        const tasksBodys = await Promise.all(
+            tasks.map(async (item: ComposedTask) => {
+                const foundTask: Task | undefined = await new TaskRepository().findOne(item.taskId);
+                if (!foundTask) {
+                    return Promise.reject();
+                }
+                const { id, missed, value } = item;
+                const { description } = foundTask;
+                return { id, missed, value, description };
+            })
+        );
+
+        if (!!list && !!tasksBodys.length) {
+            RouteResponse.success({ ...list, tasks: tasksBodys }, res);
+        } else {
+            RouteResponse.error("Couldn't complete the request", res);
+        }
+    }
+
+    /**
+     * @swagger
+     * /v1/user/lists/{memberId}:
+     *   get:
+     *     summary: Retorna as listas finalizadas de um membro
+     *     tags: [Lists]
+     *     consumes:
+     *       - application/json
+     *     produces:
+     *       - application/json
+     *     parameters:
+     *       - in: path
+     *         name: memberId
+     *         schema:
+     *           type: string
+     *         required: true
+     *     security:
+     *       - BearerAuth: []
+     *     responses:
+     *       $ref: '#/components/responses/baseResponse'
+     */
+    @Get('/:id')
+    @Middlewares(ListValidator.get())
+    public async getFinishedLists(req: Request, res: Response): Promise<void> {
+        const lists: List[] = await new ListRepository().getMemberFinishedLists(req.params.id);
+        const formattedLists = await Promise.all(
+            lists.map(
+                async (list: List): Promise<any> => {
+                    const tasks: ComposedTask[] = await new ComposedTaskRepository().getTasksByListId(`${list.id}`);
+                    const tasksBodys = await Promise.all(
+                        tasks.map(async (item: ComposedTask) => {
+                            const foundTask: Task | undefined = await new TaskRepository().findOne(item.taskId);
+                            if (!foundTask) {
+                                return Promise.reject();
+                            }
+                            const { id, missed, value } = item;
+                            const { description } = foundTask;
+                            return { id, missed, value, description };
+                        })
+                    );
+                    return { ...list, tasks: tasksBodys };
+                }
+            )
+        );
+        RouteResponse.success(formattedLists, res);
     }
 
     /**
@@ -106,39 +191,61 @@ export class ListController extends BaseController {
      *     produces:
      *       - application/json
      *     requestBody:
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               id:
+     *                 type: string
+     *                 example: 61b016a680817a00379f1e4c
+     *               name:
+     *                 type: string
+     *                 example: Tarefas de abril
+     *               status:
+     *                 type: string
+     *                 example: 'A'
+     *               startDate:
+     *                 type: string
+     *                 format: date
+     *                 example: 01/04/2021
+     *               tasks:
+     *                 type: array
+     *                 items:
+     *                   type: object
+     *                   properties:
+     *                     taskId:
+     *                       type: string
+     *                       example: 61b016a680817a00379f1e4c
+     *                     value:
+     *                       type: number
+     *                       example: 10
+     *               completionDate:
+     *                 type: string
+     *                 format: date
+     *                 example: 30/04/2021
      *     security:
      *       - BearerAuth: []
      *     responses:
-     *       $ref: '#/components/responses/taskPut'
+     *       $ref: '#/components/responses/baseEmpty'
      */
     @Put()
-    @PublicRoute()
     @Middlewares(ListValidator.put())
     public async update(req: Request, res: Response): Promise<void> {
-        RouteResponse.successEmpty(res);
-    }
-
-    /**
-     * @swagger
-     * /v1/user/lists:
-     *   patch:
-     *     summary: Altera a task com o id informado
-     *     tags: [Lists]
-     *     consumes:
-     *       - application/json
-     *     produces:
-     *       - application/json
-     *     requestBody:
-     *     security:
-     *       - BearerAuth: []
-     *     responses:
-     *       $ref: '#/components/responses/taskPut'
-     */
-    @Patch()
-    @PublicRoute()
-    @Middlewares(ListValidator.patch())
-    public async updateOneProperty(req: Request, res: Response): Promise<void> {
-        RouteResponse.successEmpty(res);
+        let newList: any = {};
+        if (req.body.listRef.status === EnumListStatus.AWAITING) {
+            const { name, status, startDate, tasks } = req.body;
+            newList = { ...req.body.listRef, name, status, startDate, tasks };
+        } else if (req.body.listRef.status === EnumListStatus.STARTED) {
+            const { status, completionDate, tasks } = req.body;
+            newList = { ...req.body.listRef, status, completionDate, tasks };
+        }
+        if (newList) {
+            await new ListRepository().update(newList);
+            RouteResponse.successEmpty(res);
+        } else {
+            RouteResponse.error('Não foi possível encontrar uma lista com o id informado', res);
+        }
     }
 
     /**
@@ -163,9 +270,10 @@ export class ListController extends BaseController {
      *       $ref: '#/components/responses/baseEmpty'
      */
     @Delete('/:id')
-    @PublicRoute()
     @Middlewares(ListValidator.delete())
     public async remove(req: Request, res: Response): Promise<void> {
+        await new ListRepository().delete(req.params.id);
+        await new ComposedTaskRepository().removeByListId(req.params.id);
         RouteResponse.successEmpty(res);
     }
 }
