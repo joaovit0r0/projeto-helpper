@@ -141,7 +141,7 @@ export class ListValidator extends BaseValidator {
 
                     if (list) {
                         req.body.listRef = list;
-                        req.body.memberId = list?.memberId;
+                        req.body.memberId = list.memberId;
                         return Promise.resolve();
                     }
                     return Promise.reject();
