@@ -68,7 +68,10 @@ export class ListRepository extends BaseRepository {
     public getMemberFinishedLists(memberId: string): Promise<List[]> {
         return this.getConnection()
             .getRepository(List)
-            .find({ where: { memberId, status: EnumListStatus.FINISHED } });
+            .find({
+                where: { memberId, status: EnumListStatus.FINISHED },
+                select: ['name', 'id', 'status', 'memberId', 'startDate', 'completionDate']
+            });
     }
 
     /**

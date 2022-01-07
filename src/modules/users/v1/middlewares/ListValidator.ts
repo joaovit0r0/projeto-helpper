@@ -158,7 +158,8 @@ export class ListValidator extends BaseValidator {
     public static put(): RequestHandler[] {
         return ListValidator.validationList({
             token: BaseValidator.validators.token,
-            id: ListValidator.model.id
+            id: ListValidator.model.id,
+            status: ListValidator.model.status
         });
     }
 
@@ -175,7 +176,6 @@ export class ListValidator extends BaseValidator {
             memberBelongsToParent: ListValidator.model.memberBelongsToParent,
             hasActiveList: ListValidator.model.hasActiveList,
             name: ListValidator.model.name,
-            startDate: ListValidator.model.startDate,
             tasks: ListValidator.model.tasks
         });
     }
@@ -192,17 +192,6 @@ export class ListValidator extends BaseValidator {
             memberExists: ListValidator.model.memberExists,
             memberBelongsToParent: ListValidator.model.memberBelongsToParent,
             listIsActive: ListValidator.model.listIsActive
-        });
-    }
-
-    /**
-     * patch
-     *
-     * @returns Lista de validadores
-     */
-    public static patch(): RequestHandler[] {
-        return ListValidator.validationList({
-            token: BaseValidator.validators.token
         });
     }
 

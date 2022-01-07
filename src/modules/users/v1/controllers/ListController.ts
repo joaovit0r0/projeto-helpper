@@ -66,8 +66,7 @@ export class ListController extends BaseController {
         const newList: DeepPartial<List> = {
             name: req.body.name,
             status: 'A',
-            memberId: req.body.memberId,
-            startDate: req.body.startDate
+            memberId: req.body.memberId
         };
 
         const { id } = await new ListRepository().insert(newList);
@@ -233,13 +232,17 @@ export class ListController extends BaseController {
     @Middlewares(ListValidator.put())
     public async update(req: Request, res: Response): Promise<void> {
         let newList: any = {};
-        if (req.body.listRef.status === EnumListStatus.AWAITING) {
+        if (req.body.listRef.status === EnumListStatus.AWAITING && req.body.status !== EnumListStatus.FINISHED) {
             const { name, status, startDate, tasks } = req.body;
             newList = { ...req.body.listRef, name, status, startDate, tasks };
-        } else if (req.body.listRef.status === EnumListStatus.STARTED) {
+        } else if (req.body.listRef.status === EnumListStatus.STARTED && req.body.status !== EnumListStatus.AWAITING) {
             const { status, completionDate, tasks } = req.body;
             newList = { ...req.body.listRef, status, completionDate, tasks };
+        } else if (req.body.listRef.status === EnumListStatus.FINISHED) {
+            RouteResponse.error('Não é possível alterar uma lista finalizada', res);
+            return;
         }
+
         if (Object.keys(newList).length !== 0) {
             await new ListRepository().update(newList);
             RouteResponse.successEmpty(res);
