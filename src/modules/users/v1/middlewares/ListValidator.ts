@@ -3,7 +3,7 @@ import { RequestHandler } from 'express';
 import { Meta, Schema } from 'express-validator';
 
 import { EnumListStatus } from '../../../../models';
-import { List, ListRepository, MemberRepository } from '../../../../library';
+import { ComposedTask, List, ListRepository, Member, MemberRepository, TaskRepository } from '../../../../library';
 import { BaseValidator } from '../../../../library/BaseValidator';
 
 /**
@@ -63,15 +63,11 @@ export class ListValidator extends BaseValidator {
                     min: 3
                 }
             },
-            isString: true
-        },
-        status: {
-            in: 'body',
-            errorMessage: 'Status de lista inválido',
             isString: true,
-            isLength: {
-                options: {
-                    max: 1
+            custom: {
+                options: async (_: string, { req }: Meta) => {
+                    const duplicate = await new ListRepository().find({ where: { name: req.body.name } });
+                    return duplicate ? Promise.reject() : Promise.resolve();
                 }
             }
         },
@@ -147,6 +143,56 @@ export class ListValidator extends BaseValidator {
                     return Promise.reject();
                 }
             }
+        },
+        status: {
+            optional: true,
+            in: 'body',
+            errorMessage: 'Status de lista inválido',
+            custom: {
+                options: (_: string, { req }: Meta) => {
+                    const validValues = [EnumListStatus.AWAITING, EnumListStatus.FINISHED, EnumListStatus.STARTED];
+                    return validValues.includes(req.body.status) ? Promise.resolve() : Promise.reject();
+                }
+            }
+        },
+        listBelongsToParent: {
+            errorMessage: 'Lista não pertence ao usuário',
+            custom: {
+                options: async (_: string, { req }: Meta) => {
+                    const member: Member | undefined = await new MemberRepository().findOne(req.body.listRef.memberId);
+                    return member?.parentId.toString() === req.body.userRef.id.toString() ? Promise.resolve() : Promise.reject();
+                }
+            }
+        },
+        completionDate: {
+            optional: true,
+            isDate: {
+                errorMessage: 'Formato de data de início inválida',
+                options: {
+                    format: 'DD/MM/YYYY',
+                    strictMode: true,
+                    delimiters: ['/']
+                }
+            },
+            in: 'body'
+        },
+        updateTasks: {
+            optional: true,
+            isArray: {
+                options: {
+                    min: 1
+                }
+            },
+            custom: {
+                options: async (_: string, { req }: Meta) => {
+                    return Promise.all(
+                        req.body.tasks.map(async (task: ComposedTask) => {
+                            const taskExists = await new TaskRepository().findOne(task.id);
+                            return taskExists ? Promise.resolve() : Promise.reject();
+                        })
+                    );
+                }
+            }
         }
     };
 
@@ -159,7 +205,12 @@ export class ListValidator extends BaseValidator {
         return ListValidator.validationList({
             token: BaseValidator.validators.token,
             id: ListValidator.model.id,
-            status: ListValidator.model.status
+            listBelongsToParent: ListValidator.model.listBelongsToParent,
+            status: ListValidator.model.status,
+            name: ListValidator.model.name,
+            startDate: ListValidator.model.startDate,
+            completionDate: ListValidator.model.completionDate,
+            tasks: ListValidator.model.updateTasks
         });
     }
 

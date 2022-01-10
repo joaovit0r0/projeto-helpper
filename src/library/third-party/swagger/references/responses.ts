@@ -261,4 +261,120 @@
  *         $ref: '#/components/responses/401'
  *       '500':
  *         $ref: '#/components/responses/500'
+ *     listGetFinished:
+ *       '200':
+ *         description: 'Requisição executada com sucesso'
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: boolean
+ *                   example: true
+ *                 date:
+ *                   type: string
+ *                   format: date-time
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: 61b016a680817a00379f1e4c
+ *                       name:
+ *                         type: string
+ *                         example: Lista de abril
+ *                       status:
+ *                         type: string
+ *                         example: F
+ *                       memberId:
+ *                         type: string
+ *                         example: 61b016a680817a00379f1e4c
+ *                       startdate:
+ *                         type: string
+ *                         format: date
+ *                       completionDate:
+ *                         type: string
+ *                         format: date
+ *                       tasks:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             id:
+ *                               type: string
+ *                               example: 61b016a680817a00379f1e4c
+ *                             missed:
+ *                               type: boolean
+ *                               example: false
+ *                             value:
+ *                               type: number
+ *                               example: 10
+ *                             description:
+ *                               type: string
+ *                               example: some description
+ *       '400':
+ *         $ref: '#/components/responses/400'
+ *       '401':
+ *         $ref: '#/components/responses/401'
+ *       '500':
+ *         $ref: '#/components/responses/500'
+ *     listGetActive:
+ *       '200':
+ *         description: 'Requisição executada com sucesso'
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: boolean
+ *                   example: true
+ *                 date:
+ *                   type: string
+ *                   format: date-time
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: 61b016a680817a00379f1e4c
+ *                     name:
+ *                       type: string
+ *                       example: Lista de abril
+ *                     status:
+ *                       type: string
+ *                       enum: ['A', 'S']
+ *                       example: A
+ *                     memberId:
+ *                       type: string
+ *                       example: 61b7268110ff150035028b33
+ *                     startDate:
+ *                       type: string
+ *                       format: date
+ *                     tasks:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             example: 61c307cad4d7310033826353
+ *                           missed:
+ *                             type: boolean
+ *                             example: false
+ *                           value:
+ *                             type: number
+ *                             example: 10
+ *                           description:
+ *                             type: string
+ *                             example: some description
+ *       '400':
+ *         $ref: '#/components/responses/400'
+ *       '401':
+ *         $ref: '#/components/responses/401'
+ *       '500':
+ *         $ref: '#/components/responses/500'
  */
